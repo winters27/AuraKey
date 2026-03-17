@@ -1,0 +1,26 @@
+.checkbox {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-surface);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out);
+}
+
+.checkbox[data-state="checked"] {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkbox__indicator {
+  color: var(--bg-base);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

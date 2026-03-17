@@ -1,0 +1,88 @@
+[package]
+name = "aurakey"
+version = "0.1.0"
+edition = "2021"
+description = "AuraKey — Lightweight system tray hotkey daemon with macro sequencing"
+authors = ["Brandon"]
+default-run = "aurakey"
+
+[lib]
+name = "aurakey_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+# GUI binary (Tauri)
+[[bin]]
+name = "aurakey"
+path = "src/main.rs"
+
+# Standalone service binary (no Tauri/webview)
+[[bin]]
+name = "aurakey-service"
+path = "src/service_main.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+# Tauri framework (only needed by GUI binary, but linked via lib for now)
+tauri = { version = "2.10.1", features = ["tray-icon"] }
+tauri-plugin-opener = "2"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.9"
+
+# Thread-safe message passing
+crossbeam-channel = "0.5"
+
+# Async runtime
+tokio = { version = "1", features = ["rt-multi-thread", "time", "macros"] }
+
+# Serial port access for Arduino HID
+serialport = "4.8"
+
+# Native file dialogs
+rfd = "0.17"
+
+# Config directory resolution
+dirs = "6"
+
+# Error handling
+anyhow = "1"
+thiserror = "2"
+
+# Fast synchronization primitives
+parking_lot = "0.12"
+
+# Image processing (coordinate picker magnifier)
+image = "0.25"
+
+# Unique identifiers for macros
+uuid = { version = "1", features = ["v4", "serde"] }
+tauri-plugin-dialog = "2.6.0"
+
+# Windows registry access (for program discovery)
+winreg = "0.55"
+
+# Windows API — input simulation, hooks, cursor, tray, pipes
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.62", features = [
+    "Win32_UI_Input_KeyboardAndMouse",
+    "Win32_UI_Input_XboxController",
+    "Win32_UI_WindowsAndMessaging",
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_System_LibraryLoader",
+    "Win32_UI_Shell",
+    "Win32_Devices_Communication",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_Security",
+    "Win32_System_Pipes",
+] }
+
+[profile.release]
+opt-level = "s"
+lto = true
+strip = true

@@ -1,0 +1,91 @@
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: background-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out),
+              opacity var(--duration-fast) var(--ease-out),
+              filter var(--duration-fast) var(--ease-out),
+              transform 80ms ease;
+}
+
+/* ── Sizes ── */
+.btn--xs     { height: 24px; padding: 0 var(--space-2); font-size: var(--text-xs); }
+.btn--sm     { height: 28px; padding: 0 var(--space-2); font-size: var(--text-xs); }
+.btn--md     { height: 32px; padding: 0 var(--space-3); }
+.btn--icon   { height: 28px; width: 28px; padding: 0; }
+.btn--icon-xs { height: 20px; width: 20px; padding: 0; }
+
+/* ── Primary ── */
+.btn--primary {
+  background: var(--accent);
+  color: var(--bg-base);
+  font-weight: 600;
+}
+.btn--primary:hover {
+  filter: brightness(1.15);
+}
+.btn--primary:active {
+  filter: brightness(0.9);
+  transform: scale(0.97);
+}
+
+/* ── Ghost ── */
+.btn--ghost {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.btn--ghost:hover {
+  background: var(--bg-surface-hover);
+  color: var(--text-primary);
+}
+.btn--ghost:active {
+  background: var(--bg-surface-active);
+}
+
+/* ── Destructive ── */
+.btn--destructive {
+  background: transparent;
+  color: var(--error);
+  font-weight: 500;
+}
+.btn--destructive:hover {
+  background: rgba(248, 113, 113, 0.1);
+  color: var(--error);
+}
+.btn--destructive:active {
+  background: rgba(248, 113, 113, 0.18);
+  transform: scale(0.97);
+}
+
+/* ── Outline ── */
+.btn--outline {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn--outline:hover {
+  background: var(--bg-surface-hover);
+  border-color: var(--bg-surface-active);
+  color: var(--text-primary);
+}
+.btn--outline:active {
+  background: var(--bg-surface-active);
+}
+
+/* ── Disabled ── */
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}

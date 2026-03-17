@@ -1,0 +1,28 @@
+.scroll-area {
+  overflow: hidden;
+}
+
+.scroll-area__viewport {
+  width: 100%;
+  height: 100%;
+}
+
+.scroll-area__scrollbar {
+  display: flex;
+  user-select: none;
+  touch-action: none;
+  padding: 0;
+  width: 6px;
+}
+
+.scroll-area__thumb {
+  flex: 1;
+  background: rgba(140, 153, 171, 0.15);
+  border-radius: 100px;
+  position: relative;
+  transition: background var(--duration-normal) var(--ease-out);
+}
+
+.scroll-area__thumb:hover {
+  background: rgba(140, 153, 171, 0.3);
+}

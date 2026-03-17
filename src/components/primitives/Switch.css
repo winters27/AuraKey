@@ -1,0 +1,24 @@
+.switch {
+  width: 36px;
+  height: 20px;
+  background: var(--bg-surface-active);
+  border-radius: 999px;
+  border: none;
+  padding: 2px;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out);
+  flex-shrink: 0;
+}
+
+.switch[data-state="checked"] { background: var(--accent); }
+
+.switch__thumb {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--duration-fast) var(--ease-out);
+}
+
+.switch[data-state="checked"] .switch__thumb { transform: translateX(16px); }

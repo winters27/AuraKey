@@ -1,0 +1,13 @@
+.separator--horizontal {
+  height: 1px;
+  width: 100%;
+  background: var(--border);
+  margin: var(--space-3) 0;
+}
+
+.separator--vertical {
+  width: 1px;
+  height: 100%;
+  background: var(--border);
+  margin: 0 var(--space-3);
+}

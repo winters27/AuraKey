@@ -1,0 +1,264 @@
+# AuraKey Example Configuration
+# ================================
+# This file shows the full schema with all 7 Apex Legends benchmark macros.
+# Place this at: %APPDATA%/aurakey/aurakey.toml (created automatically on first run)
+#
+# Tip: Import/Export macros using the .akg format via the GUI buttons.
+# Emergency Stop: Ctrl+Alt+F12 (configurable in [settings])
+
+[settings]
+stop_key = 123                          # F12 — stops recording
+emergency_stop = [162, 164, 123]        # LCtrl + LAlt + F12
+recording_countdown_secs = 3
+mouse_accumulate_ms = 16
+max_recording_secs = 60
+default_execution = "sequential"
+default_tick_rate_ms = 10
+launch_with_windows = false
+start_minimized = true
+theme = "dark"
+
+[settings.arduino]
+enabled = false
+port = ""
+auto_connect = false
+fallback_to_software = true
+
+active_profile = "Gaming"
+
+# ============================================================
+# Profile: Gaming
+# ============================================================
+
+[[profiles]]
+name = "Gaming"
+
+# ---------- Group: Apex Legends ----------
+
+[[profiles.groups]]
+name = "Apex Legends"
+enabled = true
+
+# 1. Superglide (Timeline — Ctrl+Space)
+[[profiles.groups.macros]]
+name = "Superglide"
+enabled = true
+favorite = true
+output_mode = "software"
+
+[profiles.groups.macros.trigger]
+keys = [162, 32]                        # LCtrl + Space
+mode = "press"
+
+[profiles.groups.macros.execution]
+mode = "timeline"
+
+[[profiles.groups.macros.steps]]
+type = "KeyHold"
+key = 67                                # C
+offset_us = 0
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyHold"
+key = 32                                # Space
+offset_us = 16000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyRelease"
+key = 67                                # C
+offset_us = 17000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyRelease"
+key = 32                                # Space
+offset_us = 26000
+delay_after_ms = 0
+
+# 2. Armor Swap (Timeline — F9)
+[[profiles.groups.macros]]
+name = "Armor Swap"
+enabled = true
+favorite = false
+output_mode = "software"
+
+[profiles.groups.macros.trigger]
+keys = [120]                            # F9
+mode = "press"
+
+[profiles.groups.macros.execution]
+mode = "timeline"
+
+[[profiles.groups.macros.steps]]
+type = "KeyHold"
+key = 69                                # E
+offset_us = 0
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyRelease"
+key = 69                                # E
+offset_us = 550000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "MouseAbsoluteClick"
+x = 960
+y = 540
+button = "left"
+offset_us = 555000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyTap"
+key = 27                                # Escape
+hold_ms = 10
+offset_us = 600000
+delay_after_ms = 0
+
+# 3. Move & Loot (Timeline — F10)
+[[profiles.groups.macros]]
+name = "Move & Loot"
+enabled = true
+favorite = false
+output_mode = "software"
+
+[profiles.groups.macros.trigger]
+keys = [121]                            # F10
+mode = "press"
+
+[profiles.groups.macros.execution]
+mode = "timeline"
+
+[[profiles.groups.macros.steps]]
+type = "KeyHold"
+key = 87                                # W
+offset_us = 0
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyHold"
+key = 83                                # S
+offset_us = 5000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyRelease"
+key = 83                                # S
+offset_us = 6000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyTap"
+key = 69                                # E
+hold_ms = 10
+offset_us = 51000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyHold"
+key = 32                                # Space
+offset_us = 119000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyRelease"
+key = 32                                # Space
+offset_us = 129000
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyRelease"
+key = 87                                # W
+offset_us = 250000
+delay_after_ms = 0
+
+# 4. Jitter Aim (Continuous Hold — F8)
+[[profiles.groups.macros]]
+name = "Jitter Aim"
+enabled = true
+favorite = false
+output_mode = "software"
+steps = []
+
+[profiles.groups.macros.trigger]
+keys = [119]                            # F8
+mode = "hold"
+
+[profiles.groups.macros.execution]
+mode = "continuous"
+pattern = "mouse_oscillate"
+amplitude = 26
+vertical_comp = -17
+rate_ms = 10
+
+# 5. Strafe Spam (Continuous Toggle — F7)
+[[profiles.groups.macros]]
+name = "Strafe Spam"
+enabled = true
+favorite = false
+output_mode = "software"
+steps = []
+
+[profiles.groups.macros.trigger]
+keys = [118]                            # F7
+mode = "toggle"
+
+[profiles.groups.macros.execution]
+mode = "continuous"
+pattern = "key_cycle"
+cycle_keys = [162, 65, 68, 32, 67, 65, 68, 65]  # LCtrl, A, D, Space, C, A, D, A
+rate_ms = 30
+
+# 6. Quick Reload (DoubleTap R)
+[[profiles.groups.macros]]
+name = "Quick Reload (2x R)"
+enabled = true
+favorite = false
+output_mode = "software"
+
+[profiles.groups.macros.trigger]
+keys = [82]                             # R
+mode = "double_tap"
+timeout_ms = 300
+
+[profiles.groups.macros.execution]
+mode = "sequential"
+
+[[profiles.groups.macros.steps]]
+type = "KeyTap"
+key = 82                                # R
+hold_ms = 10
+offset_us = 0
+delay_after_ms = 0
+
+# 7. Quick Holster (DoubleTap 3)
+[[profiles.groups.macros]]
+name = "Quick Holster (2x 3)"
+enabled = true
+favorite = false
+output_mode = "software"
+
+[profiles.groups.macros.trigger]
+keys = [51]                             # 3
+mode = "double_tap"
+timeout_ms = 300
+
+[profiles.groups.macros.execution]
+mode = "sequential"
+
+[[profiles.groups.macros.steps]]
+type = "KeyTap"
+key = 51                                # 3
+hold_ms = 10
+offset_us = 0
+delay_after_ms = 0
+
+[[profiles.groups.macros.steps]]
+type = "KeyTap"
+key = 51                                # 3
+hold_ms = 10
+offset_us = 0
+delay_after_ms = 50

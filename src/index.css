@@ -1,0 +1,208 @@
+/* ══════════════════════════════════════════════════════════
+   AuraKey Design System — Pure CSS + Design Tokens
+   ══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Surfaces (true neutral, no blue cast) ── */
+  --bg-base:           #0a0a0a;
+  --bg-sidebar:        #080808;
+  --bg-surface:        #141414;
+  --bg-surface-hover:  #1a1a1a;
+  --bg-surface-active: #222222;
+  --bg-elevated:       #1c1c1c;
+
+  /* ── Text (pure neutral gray) ── */
+  --text-primary:      #ececec;
+  --text-secondary:    #888888;
+  --text-tertiary:     #555555;
+
+  /* ── Borders ── */
+  --border:            #222222;
+  --border-subtle:     #1a1a1a;
+
+  /* ── Accent (used SPARINGLY) ── */
+  --accent:            #2dd4bf;
+  --accent-muted:      rgba(45, 212, 191, 0.12);
+  --accent-subtle:     rgba(45, 212, 191, 0.06);
+
+  /* ── Semantic ── */
+  --success:           #34d399;
+  --warning:           #fbbf24;
+  --error:             #f87171;
+
+  /* ── Typography ── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-lg: 16px;
+
+  /* ── Spacing (4px grid) ── */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+
+  /* ── Radii ── */
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* ── Transitions ── */
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   Reset & Base
+   ══════════════════════════════════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+  user-select: none;
+  line-height: 1.5;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 153, 171, 0.15);
+  border-radius: 100px;
+  transition: background var(--duration-normal) var(--ease-out);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 153, 171, 0.3);
+}
+::-webkit-scrollbar-corner { background: transparent; }
+
+/* ── Selection ── */
+::selection {
+  background: var(--accent-muted);
+  color: var(--accent);
+}
+
+/* ── Tauri Drag Region ── */
+*[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   Animations
+   ══════════════════════════════════════════════════════════ */
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes blink-rec {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   Keycap — Flat Neutral Badge
+   ══════════════════════════════════════════════════════════ */
+
+.keycap {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--bg-surface-hover);
+  padding: 2px 6px;
+  height: 24px;
+  min-width: 24px;
+  box-shadow:
+    0 2px 0 var(--bg-surface-active),
+    0 2px 3px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: all 80ms ease;
+  margin: 0 2px 2px;
+  line-height: 1;
+}
+
+.keycap:active {
+  transform: translateY(2px);
+  box-shadow:
+    0 0 0 var(--bg-surface-active),
+    0 0 1px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   Global Element Defaults
+   ══════════════════════════════════════════════════════════ */
+
+/* Number input spinner removal */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* SVG icons inherit color properly */
+svg {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Scoped transitions on interactive elements */
+button, a, input, select, textarea {
+  transition: background-color var(--duration-fast) var(--ease-out),
+              border-color var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out),
+              opacity var(--duration-fast) var(--ease-out);
+}
