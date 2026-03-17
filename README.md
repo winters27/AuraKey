@@ -1,15 +1,24 @@
-# AuraKey
+<p align="center">
+  <h1 align="center">AuraKey</h1>
+  <p align="center">Lightweight system tray hotkey daemon with macro sequencing.</p>
+</p>
 
-**Lightweight system tray hotkey daemon with macro sequencing.**
-
-AuraKey is a Windows utility for creating, managing, and executing keyboard/mouse macros. Built with a Tauri + React frontend and a standalone Rust daemon that runs in the background.
+<p align="center">
+  <a href="https://github.com/winters27/AuraKey/releases/latest"><img src="https://img.shields.io/github/v/release/winters27/AuraKey?style=flat-square&color=teal" alt="Release"></a>
+  <a href="https://github.com/winters27/AuraKey"><img src="https://img.shields.io/github/languages/top/winters27/AuraKey?style=flat-square&color=orange" alt="Language"></a>
+  <a href="https://github.com/winters27/AuraKey/blob/main/LICENSE"><img src="https://img.shields.io/github/license/winters27/AuraKey?style=flat-square" alt="License"></a>
+  <a href="https://github.com/winters27/AuraKey/releases/latest"><img src="https://img.shields.io/github/downloads/winters27/AuraKey/total?style=flat-square&color=blue" alt="Downloads"></a>
+  <img src="https://img.shields.io/badge/platform-Windows-0078D6?style=flat-square&logo=windows" alt="Platform">
+</p>
 
 ---
 
+AuraKey is a Windows utility for creating, managing, and executing macros triggered by **keyboard**, **mouse**, or **XInput controller** inputs. Built with a Tauri + React frontend and a standalone Rust daemon that runs in the background.
+
 ## Features
 
+- **Multi-Input Triggers** — Bind macros to keyboard shortcuts, mouse buttons, or Xbox/XInput controller buttons
 - **Macro Sequencing** — Record or manually build multi-step macros with key presses, mouse actions, delays, and more
-- **Multiple Trigger Sets** — Bind macros to keyboard shortcuts, mouse buttons, or Xbox controller buttons
 - **Step Types** — Key tap, key hold, mouse click, mouse move, scroll, delay, Run Program, and text type
 - **Execution Modes** — Sequential, timeline (absolute timestamps), or continuous (repeating loop)
 - **Profile System** — Organize macros into profiles with named groups, enable/disable individually
@@ -21,12 +30,12 @@ AuraKey is a Windows utility for creating, managing, and executing keyboard/mous
 
 ## Architecture
 
-```
+```text
 ┌──────────────┐       Named Pipe IPC       ┌──────────────────┐
 │  aurakey.exe │  ◄──────────────────────►  │  aurakey-service  │
 │   (Tauri GUI) │                            │    (Daemon)       │
 └──────────────┘                            └──────────────────┘
-                                              ├─ Input hooks
+                                              ├─ Input hooks (keyboard, mouse, XInput)
                                               ├─ Macro executor
                                               ├─ Config manager
                                               └─ Arduino bridge
@@ -37,15 +46,16 @@ AuraKey is a Windows utility for creating, managing, and executing keyboard/mous
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React, TypeScript, Vite |
-| UI Components | Radix UI primitives, custom CSS |
-| Desktop Shell | Tauri v2 |
-| Backend / Daemon | Rust |
-| IPC | Windows Named Pipes |
-| Input Simulation | Win32 `SendInput` API |
-| Hardware Passthrough | Serial (Arduino Leonardo / Pro Micro) |
+| Layer                | Technology                              |
+| -------------------- | --------------------------------------- |
+| Frontend             | React, TypeScript, Vite                 |
+| UI Components        | Radix UI primitives, custom CSS         |
+| Desktop Shell        | Tauri v2                                |
+| Backend / Daemon     | Rust                                    |
+| IPC                  | Windows Named Pipes                     |
+| Input Simulation     | Win32 `SendInput` API                   |
+| Controller Support   | XInput (Xbox controllers)               |
+| Hardware Passthrough | Serial (Arduino Leonardo / Pro Micro)   |
 
 ## Getting Started
 
@@ -74,7 +84,7 @@ npm run tauri dev
 npm run tauri build
 ```
 
-Produces `aurakey.exe`, `aurakey-service.exe`, and MSI/NSIS installers in `src-tauri/target/release/`.
+Produces `aurakey.exe` and `aurakey-service.exe` in `src-tauri/target/release/`.
 
 > **Note:** Both `aurakey.exe` and `aurakey-service.exe` must be in the same directory. The GUI auto-launches the service if it isn't already running.
 
