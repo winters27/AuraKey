@@ -133,12 +133,16 @@ export async function saveFirmware(path: string): Promise<void> {
 
 // ── Import / Export ──
 
-export async function importMacros(path: string): Promise<AppConfig> {
-  return invoke<AppConfig>('import_macros', { path });
+export async function importMacros(path: string, groupIdx: number = 0): Promise<AppConfig> {
+  return invoke<AppConfig>('import_macros', { path, groupIdx });
 }
 
 export async function exportProfile(path: string): Promise<void> {
   return invoke('export_profile', { path });
+}
+
+export async function exportMacro(groupIdx: number, macroIdx: number, path: string): Promise<void> {
+  return invoke('export_macro', { groupIdx, macroIdx, path });
 }
 
 // ── Conflict Detection ──

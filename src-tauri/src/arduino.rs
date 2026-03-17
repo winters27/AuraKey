@@ -314,7 +314,7 @@ pub fn start_auto_reconnect(port_name: String) {
 fn send_bytes(data: &[u8]) {
     let mut conn = CONNECTION.lock();
     if let Some(conn) = conn.as_mut() {
-        if conn.port.write_all(data).is_err() {
+        if conn.port.write_all(data).is_err() || conn.port.flush().is_err() {
             CONNECTED.store(false, Ordering::Relaxed);
         }
     }

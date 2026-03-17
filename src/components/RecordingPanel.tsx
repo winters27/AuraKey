@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { StepDef } from '../types/config';
 import { startRecording, stopRecording, getRecordingResult, vkName } from '../hooks/useTauri';
 import { Button } from './primitives/Button';
-import { Circle, StopCircle, Loader2, Check, X } from 'lucide-react';
+import { StopCircle, Loader2, Check, X } from 'lucide-react';
 
 type RecordingState = 'idle' | 'countdown' | 'recording' | 'stopping' | 'review';
 
@@ -266,9 +266,37 @@ export function RecordingPanel({ stopKey, countdownSecs, onAccept, onClose }: Re
   // ── Idle ──
   return (
     <div>
-      <Button variant="ghost" size="sm" onClick={beginCountdown} style={{ fontSize: 12, color: 'var(--text-secondary)', gap: 4, border: '1px solid var(--border)' }}>
-        <Circle size={12} style={{ color: 'var(--error)' }} /> Record Sequence
-      </Button>
+      <button
+        onClick={beginCountdown}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          padding: '10px 18px', fontSize: 12, fontWeight: 500,
+          color: 'var(--text-secondary)', cursor: 'pointer',
+          background: 'transparent', fontFamily: 'inherit',
+          border: '1px dashed rgba(210, 153, 34, 0.35)', borderRadius: 8,
+          transition: 'all 200ms',
+        }}
+        onMouseEnter={e => {
+          e.currentTarget.style.background = 'rgba(210, 153, 34, 0.06)';
+          e.currentTarget.style.borderColor = 'rgba(210, 153, 34, 0.5)';
+          const dot = e.currentTarget.querySelector<HTMLElement>('[data-rec-dot]');
+          if (dot) dot.style.boxShadow = '0 0 10px rgba(210, 153, 34, 0.6)';
+        }}
+        onMouseLeave={e => {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.borderColor = 'rgba(210, 153, 34, 0.35)';
+          const dot = e.currentTarget.querySelector<HTMLElement>('[data-rec-dot]');
+          if (dot) dot.style.boxShadow = '0 0 6px rgba(210, 153, 34, 0.3)';
+        }}
+      >
+        <span data-rec-dot style={{
+          width: 7, height: 7, borderRadius: '50%',
+          background: 'rgb(210, 153, 34)',
+          boxShadow: '0 0 6px rgba(210, 153, 34, 0.3)',
+          flexShrink: 0, transition: 'box-shadow 200ms',
+        }} />
+        Record Sequence
+      </button>
       {error && <div style={{ fontSize: 12, color: 'var(--error)', background: 'rgba(248,81,73,0.1)', borderRadius: 4, padding: '6px 12px', marginTop: 8 }}>{error}</div>}
     </div>
   );

@@ -28,15 +28,17 @@
 
 /* ── Primary ── */
 .btn--primary {
-  background: var(--accent);
-  color: var(--bg-base);
+  background: rgba(45, 212, 191, 0.10);
+  color: var(--accent);
   font-weight: 600;
+  border: 1px solid rgba(45, 212, 191, 0.25);
 }
 .btn--primary:hover {
-  filter: brightness(1.15);
+  background: rgba(45, 212, 191, 0.18);
+  border-color: rgba(45, 212, 191, 0.4);
 }
 .btn--primary:active {
-  filter: brightness(0.9);
+  background: rgba(45, 212, 191, 0.25);
   transform: scale(0.97);
 }
 

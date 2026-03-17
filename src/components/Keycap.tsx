@@ -5,9 +5,10 @@ import { vkName } from '../hooks/useTauri';
 
 interface KeycapProps {
   vk: number;
+  size?: 'sm' | 'lg';
 }
 
-export function Keycap({ vk }: KeycapProps) {
+export function Keycap({ vk, size }: KeycapProps) {
   const [label, setLabel] = useState('');
 
   useEffect(() => {
@@ -15,7 +16,7 @@ export function Keycap({ vk }: KeycapProps) {
     vkName(vk).then(setLabel).catch(() => setLabel(`0x${vk.toString(16).toUpperCase()}`));
   }, [vk]);
 
-  return <span className="keycap">{label}</span>;
+  return <span className={`keycap${size ? ` keycap--${size}` : ''}`}>{label}</span>;
 }
 
 /** Row of keycaps, joined by + */

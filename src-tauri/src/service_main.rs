@@ -380,7 +380,7 @@ fn handle_ipc_request(
             reload_daemon(&cfg, daemon_cmd_tx);
             IpcResponse::Config { config: cfg.clone() }
         }
-        IpcRequest::ImportMacros { path } => {
+        IpcRequest::ImportMacros { path, group_idx } => {
             let macros = match config::import_macros(std::path::Path::new(&path)) {
                 Ok(m) => m,
                 Err(e) => return IpcResponse::Error { message: e.to_string() },
@@ -391,7 +391,8 @@ fn handle_ipc_request(
                     if profile.groups.is_empty() {
                         profile.groups.push(MacroGroup::new("Imported"));
                     }
-                    profile.groups[0].macros.extend(macros);
+                    let target = if group_idx < profile.groups.len() { group_idx } else { 0 };
+                    profile.groups[target].macros.extend(macros);
                 }
                 Err(e) => return IpcResponse::Error { message: e },
             }
@@ -405,6 +406,18 @@ fn handle_ipc_request(
             let cfg = config.lock().unwrap();
             let profile = find_active_profile(&cfg);
             if let Err(e) = config::export_profile(&profile, std::path::Path::new(&path)) {
+                return IpcResponse::Error { message: e.to_string() };
+            }
+            IpcResponse::Ok
+        }
+        IpcRequest::ExportMacro { group_idx, macro_idx, path } => {
+            let cfg = config.lock().unwrap();
+            let profile = find_active_profile(&cfg);
+            if group_idx >= profile.groups.len() || macro_idx >= profile.groups[group_idx].macros.len() {
+                return IpcResponse::Error { message: "Index out of bounds".into() };
+            }
+            let macro_def = &profile.groups[group_idx].macros[macro_idx];
+            if let Err(e) = config::export_macros(&[macro_def.clone()], std::path::Path::new(&path)) {
                 return IpcResponse::Error { message: e.to_string() };
             }
             IpcResponse::Ok

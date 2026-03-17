@@ -2,32 +2,48 @@
 
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Minus, Square, X } from 'lucide-react';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './primitives/Tooltip';
 
 const appWindow = getCurrentWindow();
 
-export function TitleBar() {
+export function TitleBar({ children }: { children?: React.ReactNode }) {
   return (
     <div
       style={{
         gridColumn: '1 / -1',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
         background: 'var(--bg-sidebar)',
         borderBottom: '1px solid var(--border)',
         userSelect: 'none',
       }}
-      data-tauri-drag-region
     >
       {/* Branding */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 16px' }}>
-        <img src="/aura-logo.png" alt="AuraKey" style={{ width: 16, height: 16, opacity: 0.8 }} />
-        <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>AuraKey</span>
-        <span style={{ fontSize: 9, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', marginTop: 1 }}>v0.1.0</span>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 12px', flexShrink: 0 }} data-tauri-drag-region>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <img src="/aura-logo.png" alt="AuraKey" style={{ width: 18, height: 18, opacity: 0.8, cursor: 'default' }} />
+            </TooltipTrigger>
+            <TooltipContent side="bottom">
+              <span style={{ fontWeight: 600 }}>AuraKey</span>
+              <span style={{ opacity: 0.5, marginLeft: 6, fontFamily: 'var(--font-mono)', fontSize: 10 }}>v0.1.0</span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
+      {/* Embedded Controls */}
+      {children ? (
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', minWidth: 0 }} data-tauri-drag-region>
+          {children}
+        </div>
+      ) : (
+        <div style={{ flex: 1, alignSelf: 'stretch' }} data-tauri-drag-region />
+      )}
+
       {/* Window Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', height: '100%', flexShrink: 0 }}>
         <WindowButton onClick={() => appWindow.minimize()}>
           <Minus size={14} />
         </WindowButton>

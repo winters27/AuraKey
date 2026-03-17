@@ -9,16 +9,23 @@ import { ChevronDown } from 'lucide-react';
 
 interface BindSetterProps {
   onCapture: (keys: number[]) => void;
+  hasKeys?: boolean;
+  autoStart?: boolean;
+  onCancel?: () => void;
 }
 
 const MOUSE_VK_MAP: Record<number, number> = {
   0: 0x01, 1: 0x04, 2: 0x02, 3: 0x05, 4: 0x06,
 };
 
-export function HotkeyRecorder({ onCapture }: BindSetterProps) {
-  const [listening, setListening] = useState(false);
+export function HotkeyRecorder({ onCapture, hasKeys, autoStart, onCancel }: BindSetterProps) {
+  const [listening, setListening] = useState(autoStart ?? false);
   const [displayNames, setDisplayNames] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
+
+  useEffect(() => {
+    if (autoStart) setListening(true);
+  }, [autoStart]);
 
   useEffect(() => {
     if (!listening) return;
@@ -87,38 +94,98 @@ export function HotkeyRecorder({ onCapture }: BindSetterProps) {
     setShowDropdown(false);
   }, [onCapture]);
 
+  // ── Recording state ──
   if (listening) {
     return (
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px',
-        background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 6,
+      <div className="capture-zone active" style={{
+        display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
+        width: '100%',
       }}>
-        <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--accent)' }} />
+        <span style={{
+          width: 6, height: 6, borderRadius: '50%', background: 'rgb(210, 153, 34)',
+          animation: 'pulse-dot 1.2s ease-in-out infinite',
+        }} />
         {displayNames.length > 0
           ? <span style={{ fontSize: 12, fontFamily: 'var(--font-mono)', color: 'var(--text-primary)', fontWeight: 600 }}>{displayNames.join(' + ')}</span>
-          : <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Press any key, mouse button, or gamepad button…</span>
+          : <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>Press any key, click, or gamepad button…</span>
         }
-        <Button data-bind-cancel variant="ghost" size="xs" onClick={() => { setListening(false); setDisplayNames([]); }}
+        <Button data-bind-cancel variant="ghost" size="xs" onClick={() => { setListening(false); setDisplayNames([]); onCancel?.(); }}
           style={{ marginLeft: 'auto', fontSize: 10 }}>Cancel</Button>
       </div>
     );
   }
 
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-      <Button variant="ghost" size="sm" onClick={() => setListening(true)}
-        style={{ height: 28, fontSize: 12, color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-        Set Keybind
-      </Button>
+  // ── Idle state: no keys ──
+  if (!hasKeys) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <button
+          className="capture-zone"
+          onClick={() => setListening(true)}
+          style={{
+            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px',
+            cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 12,
+            width: '100%',
+          }}
+        >
+          Press to record a key…
+        </button>
+        <Popover open={showDropdown} onOpenChange={setShowDropdown}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" title="Browse all keys" style={{ height: 28, width: 28, color: 'var(--text-tertiary)', flexShrink: 0 }}>
+              <ChevronDown size={12} />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent align="start" style={{ width: 280, maxHeight: 320, overflowY: 'auto', padding: 12 }}>
+            <div style={{ marginBottom: 12 }}>
+              <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 6 }}>Mouse</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
+                {MOUSE_BUTTONS.map(btn => (
+                  <Button key={btn.vk} variant="ghost" size="xs" onClick={() => selectFromDropdown(btn.vk)}
+                    style={{ height: 28, fontSize: 10, justifyContent: 'flex-start' }}>{btn.label}</Button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 6 }}>Gamepad</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>
+                {GAMEPAD_BUTTONS.map(btn => (
+                  <Button key={btn.vk} variant="ghost" size="xs" onClick={() => selectFromDropdown(btn.vk)}
+                    style={{ height: 28, fontSize: 10, justifyContent: 'flex-start', gap: 6 }}>
+                    <img src={`/gamepad/${btn.img}`} alt={btn.name} style={{ width: 16, height: 16 }} />
+                    {btn.name}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
+      </div>
+    );
+  }
 
+  // ── Idle state: has keys ──
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <button
+        onClick={() => setListening(true)}
+        style={{
+          background: 'transparent', border: 'none', cursor: 'pointer',
+          fontSize: 11, color: 'var(--text-tertiary)', padding: '2px 0',
+          transition: 'color 120ms',
+        }}
+        onMouseEnter={e => { e.currentTarget.style.color = 'var(--text-secondary)'; }}
+        onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-tertiary)'; }}
+      >
+        Change
+      </button>
       <Popover open={showDropdown} onOpenChange={setShowDropdown}>
         <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" title="Browse all keys" style={{ height: 28, width: 28, color: 'var(--text-secondary)' }}>
-            <ChevronDown size={12} />
+          <Button variant="ghost" size="icon-xs" title="Browse all keys" style={{ color: 'var(--text-tertiary)' }}>
+            <ChevronDown size={10} />
           </Button>
         </PopoverTrigger>
         <PopoverContent align="start" style={{ width: 280, maxHeight: 320, overflowY: 'auto', padding: 12 }}>
-          {/* Mouse buttons */}
           <div style={{ marginBottom: 12 }}>
             <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 6 }}>Mouse</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4 }}>
@@ -128,7 +195,6 @@ export function HotkeyRecorder({ onCapture }: BindSetterProps) {
               ))}
             </div>
           </div>
-          {/* Gamepad buttons */}
           <div>
             <div style={{ fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 6 }}>Gamepad</div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 4 }}>

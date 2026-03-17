@@ -11,18 +11,18 @@
   display: flex;
   user-select: none;
   touch-action: none;
-  padding: 0;
-  width: 6px;
+  padding: 1px;
+  width: 5px;
 }
 
 .scroll-area__thumb {
   flex: 1;
-  background: rgba(140, 153, 171, 0.15);
+  background: rgba(140, 153, 171, 0.35);
   border-radius: 100px;
   position: relative;
   transition: background var(--duration-normal) var(--ease-out);
 }
 
 .scroll-area__thumb:hover {
-  background: rgba(140, 153, 171, 0.3);
+  background: rgba(140, 153, 171, 0.55);
 }

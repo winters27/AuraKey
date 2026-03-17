@@ -10,7 +10,8 @@ import { SettingsPanel } from './components/SettingsPanel';
 import { Button } from './components/primitives/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/primitives/Select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './components/primitives/DropdownMenu';
-import { Settings, Ellipsis, Plus, Pencil, Trash2, StopCircle, Play } from 'lucide-react';
+import { PromptDialog } from './components/primitives/PromptDialog';
+import { Settings, Ellipsis, Plus, Pencil, Trash2, Import, Upload } from 'lucide-react';
 import './index.css';
 
 type RightPanel = 'editor' | 'settings' | 'none';
@@ -21,6 +22,11 @@ export default function App() {
   const [panel, setPanel] = useState<RightPanel>('none');
   const [paused, setPaused] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [promptOpen, setPromptOpen] = useState(false);
+  const [promptTitle, setPromptTitle] = useState('');
+  const [promptPlaceholder, setPromptPlaceholder] = useState('');
+  const [promptDefault, setPromptDefault] = useState('');
+  const [promptCallback, setPromptCallback] = useState<((v: string) => void) | null>(null);
 
   useEffect(() => {
     getConfig()
@@ -32,6 +38,28 @@ export default function App() {
         console.error('Failed to load config:', err);
         setLoading(false);
       });
+  }, []);
+
+  // Disable default browser context menu globally
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      // Allow default context menu on text inputs for copy/paste
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      e.preventDefault();
+    };
+    document.addEventListener('contextmenu', handler);
+    return () => document.removeEventListener('contextmenu', handler);
+  }, []);
+
+  // Disable dev tools shortcuts (F12, Ctrl+Shift+I, Ctrl+Shift+J)
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'F12') { e.preventDefault(); return; }
+      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) { e.preventDefault(); return; }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
   }, []);
 
   useEffect(() => {
@@ -93,23 +121,11 @@ export default function App() {
     <div style={{
       display: 'grid',
       gridTemplateColumns: '280px 1fr',
-      gridTemplateRows: '40px 40px 1fr 28px',
+      gridTemplateRows: '40px 1fr 28px',
       height: '100vh',
     }}>
-      {/* ── Title Bar ── */}
-      <TitleBar />
-
-      {/* ── Controls Bar ── */}
-      <div style={{
-        gridColumn: '1 / -1',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 16px',
-        background: 'var(--bg-surface)',
-        borderBottom: '1px solid var(--border)',
-        zIndex: 10,
-      }}>
+      {/* ── Title Bar (with embedded controls) ── */}
+      <TitleBar>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Select
             value={config.active_profile}
@@ -132,33 +148,76 @@ export default function App() {
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" style={{ height: 28, width: 28, color: 'var(--text-secondary)' }}>
-                <Ellipsis size={14} />
+              <Button variant="ghost" size="icon" style={{ height: 28, width: 28, color: 'var(--text-secondary)', cursor: 'pointer' }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
+              >                <Ellipsis size={14} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" style={{ minWidth: 160 }}>
-              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={async () => {
-                const name = prompt('New profile name:');
-                if (!name?.trim()) return;
-                try {
-                  const { createProfile } = await import('./hooks/useTauri');
-                  const updated = await createProfile(name.trim());
-                  handleConfigUpdate(updated);
-                  setSelection(null);
-                } catch (e: any) { alert(e); }
+              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={() => {
+                setPromptTitle('New Profile');
+                setPromptPlaceholder('Profile name');
+                setPromptDefault('');
+                setPromptCallback(() => async (name: string) => {
+                  try {
+                    const { createProfile } = await import('./hooks/useTauri');
+                    const updated = await createProfile(name);
+                    handleConfigUpdate(updated);
+                    setSelection(null);
+                  } catch (e: any) { alert(e); }
+                  setPromptOpen(false);
+                });
+                setPromptOpen(true);
               }}>
                 <Plus size={12} /> New Profile
               </DropdownMenuItem>
-              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={async () => {
-                const newName = prompt('Rename profile:', config.active_profile);
-                if (!newName?.trim() || newName.trim() === config.active_profile) return;
-                try {
-                  const { renameProfile } = await import('./hooks/useTauri');
-                  const updated = await renameProfile(config.active_profile, newName.trim());
-                  handleConfigUpdate(updated);
-                } catch (e: any) { alert(e); }
+              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={() => {
+                setPromptTitle('Rename Profile');
+                setPromptPlaceholder('Profile name');
+                setPromptDefault(config.active_profile);
+                setPromptCallback(() => async (newName: string) => {
+                  if (newName === config.active_profile) { setPromptOpen(false); return; }
+                  try {
+                    const { renameProfile } = await import('./hooks/useTauri');
+                    const updated = await renameProfile(config.active_profile, newName);
+                    handleConfigUpdate(updated);
+                  } catch (e: any) { alert(e); }
+                  setPromptOpen(false);
+                });
+                setPromptOpen(true);
               }}>
                 <Pencil size={12} /> Rename
+              </DropdownMenuItem>
+              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={async () => {
+                const { open } = await import('@tauri-apps/plugin-dialog');
+                const { importMacros } = await import('./hooks/useTauri');
+                const file = await open({
+                  title: 'Import Profile / Macros',
+                  filters: [{ name: 'AuraKey Files', extensions: ['akg', 'toml', 'json'] }],
+                  multiple: false,
+                });
+                if (!file) return;
+                try {
+                  const updated = await importMacros(file, 0);
+                  handleConfigUpdate(updated);
+                } catch (e: any) { alert(`Import failed: ${e}`); }
+              }}>
+                <Import size={12} /> Import
+              </DropdownMenuItem>
+              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={async () => {
+                const { save } = await import('@tauri-apps/plugin-dialog');
+                const { exportProfile } = await import('./hooks/useTauri');
+                const file = await save({
+                  title: 'Export Profile',
+                  defaultPath: `${config.active_profile}.akg`,
+                  filters: [{ name: 'AuraKey Profile', extensions: ['akg'] }],
+                });
+                if (!file) return;
+                try { await exportProfile(file); }
+                catch (e: any) { alert(`Export failed: ${e}`); }
+              }}>
+                <Upload size={12} /> Export
               </DropdownMenuItem>
               <DropdownMenuItem
                 style={{ fontSize: 12, gap: 8, color: 'var(--error)' }}
@@ -181,31 +240,57 @@ export default function App() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Button
-            variant={paused ? 'ghost' : 'destructive'}
+            variant={paused ? 'outline' : 'outline'}
             size="sm"
             onClick={handleTogglePause}
             title={paused ? 'Resume macro daemon' : 'Pause daemon & cancel running macros'}
             style={{
               fontSize: 12,
-              gap: 4,
-              ...(paused ? { color: 'var(--success)' } : {}),
+              gap: 6,
+              cursor: 'pointer',
+              color: 'var(--text-primary)',
+              ...(paused
+                ? { background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)' }
+                : { background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }
+              ),
             }}
           >
-            {paused
-              ? <><Play size={12} /> Start</>
-              : <><StopCircle size={12} /> Stop</>}
+            {paused ? (
+              <>
+                <span style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: 'var(--success)',
+                  display: 'inline-block', flexShrink: 0,
+                }} />
+                Start
+              </>
+            ) : (
+              <>
+                <span style={{
+                  width: 8, height: 8, borderRadius: '50%',
+                  background: '#ef4444',
+                  display: 'inline-block', flexShrink: 0,
+                  animation: 'pulse-dot 2s ease-in-out infinite',
+                }} />
+                Stop
+              </>
+            )}
           </Button>
+
+          <style>{`@keyframes pulse-dot { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 50% { opacity: 0.7; box-shadow: 0 0 8px 3px rgba(239,68,68,0.3); } }`}</style>
 
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setPanel(panel === 'settings' ? 'none' : 'settings')}
-            style={{ height: 28, width: 28, color: 'var(--text-secondary)' }}
+            style={{ height: 28, width: 28, color: 'var(--text-secondary)', cursor: 'pointer' }}
+            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
+            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
           >
             <Settings size={14} />
           </Button>
         </div>
-      </div>
+      </TitleBar>
 
       {/* ── Sidebar ── */}
       <MacroList
@@ -289,6 +374,15 @@ export default function App() {
           } macros
         </div>
       </div>
+
+      <PromptDialog
+        open={promptOpen}
+        title={promptTitle}
+        placeholder={promptPlaceholder}
+        defaultValue={promptDefault}
+        onConfirm={(v) => promptCallback?.(v)}
+        onCancel={() => setPromptOpen(false)}
+      />
     </div>
   );
 }

@@ -88,15 +88,14 @@ html, body, #root {
 }
 
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(140, 153, 171, 0.15);
+  background: rgba(140, 153, 171, 0.35);
   border-radius: 100px;
-  transition: background var(--duration-normal) var(--ease-out);
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(140, 153, 171, 0.3);
+  background: rgba(140, 153, 171, 0.55);
 }
 ::-webkit-scrollbar-corner { background: transparent; }
 
@@ -126,6 +125,11 @@ html, body, #root {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 @keyframes pulse-dot {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
@@ -139,6 +143,48 @@ html, body, #root {
 @keyframes spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+@keyframes march {
+  to { background-position: 200% 0; }
+}
+
+/* ── Capture zone — animated dashed border ── */
+.capture-zone {
+  position: relative;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+}
+/* Static dashed border + pulsing glow */
+.capture-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  border: 1px dashed rgba(210, 153, 34, 0.35);
+  pointer-events: none;
+  box-shadow: 0 0 8px rgba(210, 153, 34, 0.08), inset 0 0 8px rgba(210, 153, 34, 0.04);
+  animation: glow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(210, 153, 34, 0.06), inset 0 0 6px rgba(210, 153, 34, 0.03); }
+  50% { box-shadow: 0 0 14px rgba(210, 153, 34, 0.18), inset 0 0 14px rgba(210, 153, 34, 0.06); }
+}
+
+/* Active recording: amber fill + stronger glow */
+.capture-zone.active {
+  background: rgba(210, 153, 34, 0.06);
+}
+.capture-zone.active::before {
+  border-color: rgba(210, 153, 34, 0.5);
+  animation: glow-pulse-active 2s ease-in-out infinite;
+}
+
+@keyframes glow-pulse-active {
+  0%, 100% { box-shadow: 0 0 8px rgba(210, 153, 34, 0.12), inset 0 0 8px rgba(210, 153, 34, 0.06); }
+  50% { box-shadow: 0 0 20px rgba(210, 153, 34, 0.25), inset 0 0 16px rgba(210, 153, 34, 0.08); }
 }
 
 
@@ -180,6 +226,13 @@ html, body, #root {
     rgb(0, 0, 0) 0px 0px 0.5px 0.5px,
     rgba(0, 0, 0, 0.25) 0px 1px 1px 0.5px inset,
     rgba(255, 255, 255, 0.15) 0px 1px 1px 0px inset;
+}
+
+.keycap--lg {
+  font-size: 15px;
+  padding: 8px 16px;
+  height: 44px;
+  min-width: 44px;
 }
 
 

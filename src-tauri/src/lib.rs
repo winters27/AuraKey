@@ -186,6 +186,7 @@ pub fn run() {
             commands::get_recording_result,
             commands::import_macros,
             commands::export_profile,
+            commands::export_macro,
             commands::arduino_connect,
             commands::arduino_disconnect,
             commands::arduino_ping,

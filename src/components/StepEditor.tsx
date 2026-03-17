@@ -81,126 +81,159 @@ export function StepAdder({ onAdd }: StepEditorProps) {
   const handleAdd = () => { onAdd(draft); setDraft(defaultStep(selectedType)); };
 
   return (
-    <div style={{ background: 'linear-gradient(137deg, #111214 4.87%, #0c0d0f 75.88%)', border: '1px solid var(--border)', borderRadius: 8, padding: 20, boxShadow: 'inset 0 1px 0 0 var(--border-highlight)' }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, marginBottom: 16 }}>
+    <div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 10 }}>
         <Select value={selectedType} onValueChange={changeType}>
-          <SelectTrigger style={{ width: 200, maxWidth: '100%', height: 32, fontSize: 13 }}>
+          <SelectTrigger style={{ width: 180, height: 30, fontSize: 12 }}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {STEP_TYPES.map(t => (
-              <SelectItem key={t.value} value={t.value} style={{ fontSize: 13 }}>{t.label}</SelectItem>
+              <SelectItem key={t.value} value={t.value} style={{ fontSize: 12 }}>{t.label}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Button size="sm" variant="primary" onClick={handleAdd} style={{ height: 32, fontSize: 12, gap: 4 }}>
-          <Plus size={14} /> Add Step
+        <StepFields step={draft} onChange={setDraft} />
+        <Button size="sm" variant="primary" onClick={handleAdd} style={{ height: 30, fontSize: 11, gap: 4, marginLeft: 'auto' }}>
+          <Plus size={12} /> Add
         </Button>
       </div>
-
-      <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginBottom: 20, lineHeight: 1.4 }}>
+      <div style={{ fontSize: 10, color: 'var(--text-tertiary)', marginTop: 6, lineHeight: 1.3 }}>
         {STEP_TYPES.find(t => t.value === selectedType)?.desc}
-      </div>
-
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-end', gap: '16px 20px' }}>
-        <StepFields step={draft} onChange={setDraft} />
       </div>
     </div>
   );
 }
 
+const T = ({ children }: { children: React.ReactNode }) => (
+  <span style={{ fontSize: 11, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>{children}</span>
+);
+
 function StepFields({ step, onChange }: { step: StepDef; onChange: (step: StepDef) => void }) {
   switch (step.type) {
     case 'KeyTap':
-      return <KeyCapture label="Key" vk={step.key} onChange={v => onChange({ ...step, key: v })} />;
+      return (<>
+        <T>Tap</T>
+        <KeyCapture vk={step.key} onChange={v => onChange({ ...step, key: v })} />
+      </>);
     case 'KeyHold':
       return (<>
-        <KeyCapture label="Key" vk={step.key} onChange={v => onChange({ ...step, key: v })} />
-        <NumField label="Duration (ms)" value={step.duration_ms} onChange={v => onChange({ ...step, duration_ms: v })} />
+        <T>Hold</T>
+        <KeyCapture vk={step.key} onChange={v => onChange({ ...step, key: v })} />
+        <T>for</T>
+        <NumField value={step.duration_ms} onChange={v => onChange({ ...step, duration_ms: v })} />
+        <T>ms</T>
       </>);
     case 'KeyRelease':
-      return <KeyCapture label="Key" vk={step.key} onChange={v => onChange({ ...step, key: v })} />;
+      return (<>
+        <T>Release</T>
+        <KeyCapture vk={step.key} onChange={v => onChange({ ...step, key: v })} />
+      </>);
     case 'KeySequence':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
-          <div>
-            <label style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: 8, display: 'block' }}>Keys in sequence</label>
-            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 8 }}>
-              {step.keys.map((k, i) => (
-                <KeyCapture key={i} vk={k} onChange={v => { const keys = [...step.keys]; keys[i] = v; onChange({ ...step, keys }); }} />
-              ))}
-              <Button variant="ghost" size="sm" onClick={() => onChange({ ...step, keys: [...step.keys, 0x20] })}
-                style={{ height: 32, fontSize: 12, color: 'var(--text-secondary)' }}>+ Key</Button>
-            </div>
-          </div>
-          <NumField label="Delay between keys (ms)" value={step.per_key_delay_ms} onChange={v => onChange({ ...step, per_key_delay_ms: v })} />
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, flex: 1 }}>
+          <T>Type</T>
+          {step.keys.map((k, i) => (
+            <KeyCapture key={i} vk={k} onChange={v => { const keys = [...step.keys]; keys[i] = v; onChange({ ...step, keys }); }} />
+          ))}
+          <Button variant="ghost" size="sm" onClick={() => onChange({ ...step, keys: [...step.keys, 0x20] })}
+            style={{ height: 28, fontSize: 11, color: 'var(--text-secondary)', padding: '0 8px' }}>+</Button>
+          <T>with</T>
+          <NumField value={step.per_key_delay_ms} onChange={v => onChange({ ...step, per_key_delay_ms: v })} />
+          <T>ms gap</T>
         </div>
       );
     case 'MouseClick':
+      return (<>
+        <T>Click</T>
+        <SelectField value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
+      </>);
     case 'MouseRelease':
-      return <SelectField label="Button" value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />;
+      return (<>
+        <T>Release</T>
+        <SelectField value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
+      </>);
     case 'MouseHold':
       return (<>
-        <SelectField label="Button" value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
-        <NumField label="Duration (ms)" value={step.duration_ms} onChange={v => onChange({ ...step, duration_ms: v })} />
+        <T>Hold</T>
+        <SelectField value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
+        <T>for</T>
+        <NumField value={step.duration_ms} onChange={v => onChange({ ...step, duration_ms: v })} />
+        <T>ms</T>
       </>);
     case 'MouseMoveRelative':
       return (<>
-        <NumField label="X offset (px)" value={step.dx} onChange={v => onChange({ ...step, dx: v })} />
-        <NumField label="Y offset (px)" value={step.dy} onChange={v => onChange({ ...step, dy: v })} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, justifyContent: 'center', height: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Checkbox id="stepped" checked={step.stepped} onCheckedChange={c => onChange({ ...step, stepped: c === true })} />
-            <label htmlFor="stepped" style={{ fontSize: 13, color: 'var(--text-secondary)', fontWeight: 500 }}>Stepped</label>
-          </div>
+        <T>Move by</T>
+        <NumField value={step.dx} onChange={v => onChange({ ...step, dx: v })} />
+        <T>,</T>
+        <NumField value={step.dy} onChange={v => onChange({ ...step, dy: v })} />
+        <T>px</T>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Checkbox id="stepped" checked={step.stepped} onCheckedChange={c => onChange({ ...step, stepped: c === true })} />
+          <label htmlFor="stepped" style={{ fontSize: 11, color: 'var(--text-secondary)' }}>Stepped</label>
         </div>
       </>);
     case 'MouseMoveAbsolute':
       return (<>
-        <NumField label="X position (px)" value={step.x} onChange={v => onChange({ ...step, x: v })} />
-        <NumField label="Y position (px)" value={step.y} onChange={v => onChange({ ...step, y: v })} />
-        <Button variant="ghost" size="sm" title="Pick from screen" onClick={async () => { try { const [x, y] = await pickCoordinate(); onChange({ ...step, x, y }); } catch {} }}
-          style={{ height: 32, fontSize: 12, color: 'var(--text-secondary)', gap: 4 }}>
+        <T>Move to</T>
+        <NumField value={step.x} onChange={v => onChange({ ...step, x: v })} />
+        <T>,</T>
+        <NumField value={step.y} onChange={v => onChange({ ...step, y: v })} />
+        <Button variant="ghost" size="sm" onClick={async () => { try { const [x, y] = await pickCoordinate(); onChange({ ...step, x, y }); } catch {} }}
+          style={{ height: 28, fontSize: 11, color: 'var(--text-secondary)', gap: 4 }}>
           <Crosshair size={11} /> Pick
         </Button>
       </>);
     case 'MouseAbsoluteClick':
       return (<>
-        <NumField label="X position (px)" value={step.x} onChange={v => onChange({ ...step, x: v })} />
-        <NumField label="Y position (px)" value={step.y} onChange={v => onChange({ ...step, y: v })} />
-        <Button variant="ghost" size="sm" title="Pick from screen" onClick={async () => { try { const [x, y] = await pickCoordinate(); onChange({ ...step, x, y }); } catch {} }}
-          style={{ height: 32, fontSize: 12, color: 'var(--text-secondary)', gap: 4 }}>
+        <T>Click</T>
+        <SelectField value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
+        <T>at</T>
+        <NumField value={step.x} onChange={v => onChange({ ...step, x: v })} />
+        <T>,</T>
+        <NumField value={step.y} onChange={v => onChange({ ...step, y: v })} />
+        <Button variant="ghost" size="sm" onClick={async () => { try { const [x, y] = await pickCoordinate(); onChange({ ...step, x, y }); } catch {} }}
+          style={{ height: 28, fontSize: 11, color: 'var(--text-secondary)', gap: 4 }}>
           <Crosshair size={11} /> Pick
         </Button>
-        <SelectField label="Button" value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
       </>);
     case 'MouseSteppedDeltaClick':
       return (<>
-        <NumField label="X offset (px)" value={step.dx} onChange={v => onChange({ ...step, dx: v })} />
-        <NumField label="Y offset (px)" value={step.dy} onChange={v => onChange({ ...step, dy: v })} />
-        <SelectField label="Button" value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
+        <T>Click</T>
+        <SelectField value={step.button} options={MOUSE_BTNS} onChange={v => onChange({ ...step, button: v })} />
+        <T>at Δ</T>
+        <NumField value={step.dx} onChange={v => onChange({ ...step, dx: v })} />
+        <T>,</T>
+        <NumField value={step.dy} onChange={v => onChange({ ...step, dy: v })} />
       </>);
     case 'MouseScroll':
       return (<>
-        <SelectField label="Direction" value={step.direction} options={SCROLL_DIRS} onChange={v => onChange({ ...step, direction: v })} />
-        <NumField label="Scroll amount" value={step.amount} onChange={v => onChange({ ...step, amount: v })} />
+        <T>Scroll</T>
+        <SelectField value={step.direction} options={SCROLL_DIRS} onChange={v => onChange({ ...step, direction: v })} />
+        <NumField value={step.amount} onChange={v => onChange({ ...step, amount: v })} />
+        <T>notches</T>
       </>);
     case 'Delay':
-      return <NumField label="Wait duration (ms)" value={step.ms} onChange={v => onChange({ ...step, ms: v })} />;
+      return (<>
+        <T>Wait for</T>
+        <NumField value={step.ms} onChange={v => onChange({ ...step, ms: v })} />
+        <T>ms</T>
+      </>);
     case 'RepeatBlock':
       return (<>
-        <NumField label="Steps to repeat" value={step.step_count} onChange={v => onChange({ ...step, step_count: v })} />
-        <NumField label="Times" value={step.repeat_count} onChange={v => onChange({ ...step, repeat_count: v })} />
+        <T>Repeat last</T>
+        <NumField value={step.step_count} onChange={v => onChange({ ...step, step_count: v })} />
+        <T>steps ×</T>
+        <NumField value={step.repeat_count} onChange={v => onChange({ ...step, repeat_count: v })} />
+        <T>times</T>
       </>);
     case 'Label':
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, width: '100%' }}>
-          <label style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Label text</label>
-          <Input value={step.text} onChange={e => onChange({ ...step, text: e.target.value })} placeholder="Comment or separator..." style={{ height: 32, fontSize: 13 }} />
-        </div>
+        <Input value={step.text} onChange={e => onChange({ ...step, text: e.target.value })} placeholder="Comment…"
+          style={{ height: 28, fontSize: 12, flex: 1, minWidth: 120 }} />
       );
     case 'CancelAll':
-      return <div style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>No parameters — stops all running macros when this step executes.</div>;
+      return null;
     case 'RunProgram':
       return <RunProgramFields step={step} onChange={onChange} />;
     default: return null;
@@ -323,30 +356,28 @@ function RunProgramFields({ step, onChange }: { step: Extract<StepDef, { type: '
   );
 }
 
-function NumField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+function NumField({ label, value, unit, onChange }: { label?: string; value: number; unit?: string; onChange: (v: number) => void }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 90 }}>
-      <label style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</label>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      {label && <span style={{ fontSize: 11, color: 'var(--text-tertiary)', whiteSpace: 'nowrap' }}>{label}</span>}
       <Input type="number" value={value} onChange={e => { const n = Number(e.target.value); if (!isNaN(n)) onChange(n); }}
-        style={{ width: 120, maxWidth: '100%', height: 32, fontSize: 13 }} />
+        style={{ width: 72, height: 28, fontSize: 12, textAlign: 'center' }} />
+      {unit && <span style={{ fontSize: 10, color: 'var(--text-tertiary)' }}>{unit}</span>}
     </div>
   );
 }
 
-function SelectField({ label, value, options, onChange }: {
-  label: string; value: string; options: { value: string; label: string }[]; onChange: (v: string) => void;
+function SelectField({ value, options, onChange }: {
+  value: string; options: { value: string; label: string }[]; onChange: (v: string) => void;
 }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 120 }}>
-      <label style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</label>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger style={{ width: 140, maxWidth: '100%', height: 32, fontSize: 13 }}>
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map(o => <SelectItem key={o.value} value={o.value} style={{ fontSize: 13 }}>{o.label}</SelectItem>)}
-        </SelectContent>
-      </Select>
-    </div>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger style={{ width: 110, height: 28, fontSize: 12 }}>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map(o => <SelectItem key={o.value} value={o.value} style={{ fontSize: 12 }}>{o.label}</SelectItem>)}
+      </SelectContent>
+    </Select>
   );
 }

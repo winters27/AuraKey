@@ -233,14 +233,20 @@ pub fn get_recording_result(state: State<'_, AppState>) -> Result<Option<Value>,
 
 /// Import macros from a file path.
 #[tauri::command]
-pub fn import_macros(state: State<'_, AppState>, path: String) -> Result<AppConfig, String> {
-    ipc_config_call(&state, IpcRequest::ImportMacros { path })
+pub fn import_macros(state: State<'_, AppState>, path: String, group_idx: usize) -> Result<AppConfig, String> {
+    ipc_config_call(&state, IpcRequest::ImportMacros { path, group_idx })
 }
 
 /// Export the active profile to a file path.
 #[tauri::command]
 pub fn export_profile(state: State<'_, AppState>, path: String) -> Result<(), String> {
     ipc_ok_call(&state, IpcRequest::ExportProfile { path })
+}
+
+/// Export a single macro to a file path.
+#[tauri::command]
+pub fn export_macro(state: State<'_, AppState>, group_idx: usize, macro_idx: usize, path: String) -> Result<(), String> {
+    ipc_ok_call(&state, IpcRequest::ExportMacro { group_idx, macro_idx, path })
 }
 
 // ========================================================================

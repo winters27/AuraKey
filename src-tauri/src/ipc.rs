@@ -60,10 +60,12 @@ pub enum IpcRequest {
         from_idx: usize,
         to_group: usize,
     },
-    /// Import macros from file.
-    ImportMacros { path: String },
+    /// Import macros from file into a specific group.
+    ImportMacros { path: String, group_idx: usize },
     /// Export active profile to file.
     ExportProfile { path: String },
+    /// Export a single macro to file.
+    ExportMacro { group_idx: usize, macro_idx: usize, path: String },
     /// Toggle pause/resume.
     TogglePause,
     /// Cancel all running macros.
