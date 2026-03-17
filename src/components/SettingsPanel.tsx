@@ -187,7 +187,7 @@ export function SettingsPanel({ config, onConfigUpdate }: SettingsPanelProps) {
           </Select>
         </SettingsRow>
         <SettingsRow label="Config Directory" sub="Open config folder in Explorer" noBorder>
-          <Button variant="ghost" size="sm" onClick={openConfigDir} style={{ height: 28, fontSize: 12, color: 'var(--text-secondary)', gap: 4 }}>
+          <Button variant="ghost" size="sm" onClick={openConfigDir} style={{ height: 28, fontSize: 12, gap: 4 }}>
             <FolderOpen size={12} /> Open
           </Button>
         </SettingsRow>
@@ -230,7 +230,7 @@ export function SettingsPanel({ config, onConfigUpdate }: SettingsPanelProps) {
               ))}
             </SelectContent>
           </Select>
-          <Button variant="ghost" size="icon" onClick={refreshPorts} title="Refresh ports" style={{ height: 32, width: 32, color: 'var(--text-secondary)' }}>
+          <Button variant="ghost" size="icon" onClick={refreshPorts} title="Refresh ports" style={{ height: 32, width: 32 }}>
             <RefreshCw size={12} />
           </Button>
           {!arduinoConnected ? (
@@ -256,7 +256,7 @@ export function SettingsPanel({ config, onConfigUpdate }: SettingsPanelProps) {
             <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-primary)' }}>AuraHID v3 Firmware</div>
             <div style={{ fontSize: 11, color: 'var(--text-tertiary)', marginTop: 2 }}>Arduino Leonardo / Pro Micro sketch for hardware-level HID passthrough</div>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleDownloadFirmware} style={{ height: 28, fontSize: 12, color: 'var(--text-secondary)', gap: 4 }}>
+          <Button variant="ghost" size="sm" onClick={handleDownloadFirmware} style={{ height: 28, fontSize: 12, gap: 4 }}>
             <Download size={12} /> Save .ino
           </Button>
         </div>

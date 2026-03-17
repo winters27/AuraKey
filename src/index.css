@@ -3,22 +3,23 @@
    ══════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Surfaces (true neutral, no blue cast) ── */
-  --bg-base:           #0a0a0a;
-  --bg-sidebar:        #080808;
-  --bg-surface:        #141414;
-  --bg-surface-hover:  #1a1a1a;
-  --bg-surface-active: #222222;
-  --bg-elevated:       #1c1c1c;
+  /* ── Surfaces ── */
+  --bg-base:           #07080a;
+  --bg-sidebar:        #08090b;
+  --bg-surface:        #0c0d0f;
+  --bg-surface-hover:  #111214;
+  --bg-surface-active: #161719;
+  --bg-elevated:       #0e0f12;
 
-  /* ── Text (pure neutral gray) ── */
+  /* ── Text ── */
   --text-primary:      #ececec;
   --text-secondary:    #888888;
   --text-tertiary:     #555555;
 
   /* ── Borders ── */
-  --border:            #222222;
-  --border-subtle:     #1a1a1a;
+  --border:            rgba(255, 255, 255, 0.06);
+  --border-subtle:     rgba(255, 255, 255, 0.03);
+  --border-highlight:  rgba(255, 255, 255, 0.1);
 
   /* ── Accent (used SPARINGLY) ── */
   --accent:            #2dd4bf;
@@ -147,33 +148,38 @@ html, body, #root {
 
 .keycap {
   font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
-  border-radius: 5px;
-  border: 1px solid var(--border);
-  background: var(--bg-surface-hover);
-  padding: 2px 6px;
-  height: 24px;
-  min-width: 24px;
+  color: rgb(255, 255, 255);
+  border-radius: 6px;
+  border: none;
+  background: radial-gradient(75% 75% at 50% 92%, rgb(18, 18, 18) 0px, rgb(13, 13, 13) 100%);
+  padding: 6px 12px;
+  height: 36px;
+  min-width: 36px;
   box-shadow:
-    0 2px 0 var(--bg-surface-active),
-    0 2px 3px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    rgba(0, 0, 0, 0.4) 0px 1px 0px 1.5px,
+    rgb(0, 0, 0) 0px 0px 0.5px 0.5px,
+    rgba(0, 0, 0, 0.25) 0px 1px 1px 0.5px inset,
+    rgba(255, 255, 255, 0.2) 0px 1px 1px 0.5px inset;
+  text-shadow: rgba(0, 0, 0, 0.1) 0px 0.5px 0.5px;
   transition: all 80ms ease;
   margin: 0 2px 2px;
   line-height: 1;
+  letter-spacing: 0.02em;
 }
 
 .keycap:active {
+  background: radial-gradient(75% 75% at 50% 92%, rgb(21, 21, 21) 0px, rgb(13, 13, 13) 100%);
   transform: translateY(2px);
   box-shadow:
-    0 0 0 var(--bg-surface-active),
-    0 0 1px rgba(0, 0, 0, 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    rgba(0, 0, 0, 0) 0px 0px 0px 0px,
+    rgb(0, 0, 0) 0px 0px 0.5px 0.5px,
+    rgba(0, 0, 0, 0.25) 0px 1px 1px 0.5px inset,
+    rgba(255, 255, 255, 0.15) 0px 1px 1px 0px inset;
 }
 
 

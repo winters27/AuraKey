@@ -46,26 +46,28 @@
   color: var(--text-secondary);
 }
 .btn--ghost:hover {
-  background: var(--bg-surface-hover);
+  background: transparent;
   color: var(--text-primary);
 }
 .btn--ghost:active {
-  background: var(--bg-surface-active);
+  color: var(--text-primary);
+  opacity: 0.8;
 }
 
 /* ── Destructive ── */
 .btn--destructive {
-  background: transparent;
+  background: rgba(248, 113, 113, 0.12);
   color: var(--error);
   font-weight: 500;
+  border: 1px solid rgba(248, 113, 113, 0.3);
 }
 .btn--destructive:hover {
-  background: rgba(248, 113, 113, 0.1);
-  color: var(--error);
+  background: rgba(248, 113, 113, 0.18);
+  color: #ff8a8a;
+  border-color: rgba(248, 113, 113, 0.5);
 }
 .btn--destructive:active {
-  background: rgba(248, 113, 113, 0.18);
-  transform: scale(0.97);
+  background: rgba(248, 113, 113, 0.25);
 }
 
 /* ── Outline ── */

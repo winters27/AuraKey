@@ -722,7 +722,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
                 }}
               />
             )}
-            <div ref={listRef} style={{ borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden' }}>
+            <div ref={listRef} style={{ borderRadius: 8, border: '1px solid var(--border)', overflow: 'hidden', background: 'linear-gradient(137deg, #111214 4.87%, #0c0d0f 75.88%)', boxShadow: 'inset 0 1px 0 0 var(--border-highlight)' }}>
               {draft.steps.map((step, idx) => (
                 <div key={`step-wrapper-${idx}`} style={{ position: 'relative', borderTop: idx > 0 ? '1px solid var(--border-subtle)' : 'none' }}>
                   {dropIndicator === idx && dragIdx !== null && dragIdx !== idx && (
@@ -803,7 +803,7 @@ function StepRow({ idx, isCollapsed, isDragging, onPointerDown, stepTypeName, st
       data-step-idx={idx}
       style={{
         display: 'flex', flexDirection: 'column', position: 'relative', zIndex: 10,
-        background: hovered ? 'var(--bg-surface-hover)' : 'var(--bg-surface)',
+        background: hovered ? 'rgba(255, 255, 255, 0.03)' : 'transparent',
         transition: 'background-color 100ms',
         ...(isDragging ? { opacity: 0.4, transform: 'scale(0.95)' } : {}),
       }}
@@ -833,7 +833,7 @@ function StepRow({ idx, isCollapsed, isDragging, onPointerDown, stepTypeName, st
   );
 }
 
-/** Section heading — flat Raycast-style with border-t separator */
+/** Section heading — flat style with border-t separator */
 function Section({ title, children, first }: { title: string; children: React.ReactNode; first?: boolean }) {
   return (
     <div style={{

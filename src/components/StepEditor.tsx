@@ -81,7 +81,7 @@ export function StepAdder({ onAdd }: StepEditorProps) {
   const handleAdd = () => { onAdd(draft); setDraft(defaultStep(selectedType)); };
 
   return (
-    <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, padding: 20 }}>
+    <div style={{ background: 'linear-gradient(137deg, #111214 4.87%, #0c0d0f 75.88%)', border: '1px solid var(--border)', borderRadius: 8, padding: 20, boxShadow: 'inset 0 1px 0 0 var(--border-highlight)' }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 16, marginBottom: 16 }}>
         <Select value={selectedType} onValueChange={changeType}>
           <SelectTrigger style={{ width: 200, maxWidth: '100%', height: 32, fontSize: 13 }}>

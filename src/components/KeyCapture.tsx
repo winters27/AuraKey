@@ -58,12 +58,13 @@ export function KeyCapture({ vk, onChange, label }: KeyCaptureProps) {
                 boxShadow: '0 0 0 3px var(--accent-muted)',
               }
             : {
-                background: 'var(--bg-surface-hover)',
-                border: '1px solid var(--border)',
-                color: 'var(--text-primary)',
-                borderRadius: 5,
+                background: 'radial-gradient(75% 75% at 50% 92%, rgb(18, 18, 18) 0px, rgb(13, 13, 13) 100%)',
+                border: 'none',
+                color: 'rgb(255, 255, 255)',
+                borderRadius: 6,
                 boxShadow:
-                  '0 2px 0 var(--bg-surface-active), 0 2px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06)',
+                  'rgba(0,0,0,0.4) 0px 1px 0px 1.5px, rgb(0,0,0) 0px 0px 0.5px 0.5px, rgba(0,0,0,0.25) 0px 1px 1px 0.5px inset, rgba(255,255,255,0.2) 0px 1px 1px 0.5px inset',
+                textShadow: 'rgba(0,0,0,0.1) 0px 0.5px 0.5px',
               }
           ),
         }}

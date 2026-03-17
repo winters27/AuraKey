@@ -150,7 +150,7 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
         borderBottom: '1px solid var(--border)',
       }}>
         <span style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Macros</span>
-        <Button variant="ghost" size="xs" onClick={handleCreateGroup} style={{ fontSize: 11, color: 'var(--text-secondary)', gap: 4 }}>
+        <Button variant="ghost" size="xs" onClick={handleCreateGroup} style={{ fontSize: 11, gap: 4 }}>
           <Plus size={12} />Group
         </Button>
       </div>
@@ -235,7 +235,7 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
                     variant="ghost"
                     size="icon-xs"
                     onClick={(e) => { e.stopPropagation(); handleCreateMacro(gIdx); }}
-                    style={{ color: 'var(--text-secondary)' }}
+                    style={{}}
                   >
                     <Plus size={10} />
                   </Button>
@@ -280,10 +280,10 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
         padding: '12px 16px',
         borderTop: '1px solid var(--border)',
       }}>
-        <Button variant="ghost" size="xs" onClick={handleImport} style={{ fontSize: 11, color: 'var(--text-secondary)', gap: 4 }}>
+        <Button variant="ghost" size="xs" onClick={handleImport} style={{ fontSize: 11, gap: 4 }}>
           <Import size={12} /> Import
         </Button>
-        <Button variant="ghost" size="xs" onClick={handleExport} style={{ fontSize: 11, color: 'var(--text-secondary)', gap: 4 }}>
+        <Button variant="ghost" size="xs" onClick={handleExport} style={{ fontSize: 11, gap: 4 }}>
           <Upload size={12} /> Export
         </Button>
       </div>

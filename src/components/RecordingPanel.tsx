@@ -144,7 +144,7 @@ export function RecordingPanel({ stopKey, countdownSecs, onAccept, onClose }: Re
   // ── Countdown ──
   if (state === 'countdown') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 0', background: 'linear-gradient(137deg, #111214 4.87%, #0c0d0f 75.88%)', border: '1px solid var(--border)', borderRadius: 8, boxShadow: 'inset 0 1px 0 0 var(--border-highlight)' }}>
         <div style={{ fontSize: 36, fontWeight: 700, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{countdown}</div>
         <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>Get ready…</div>
         <Button variant="ghost" size="sm" onClick={() => setState('idle')} style={{ marginTop: 16, fontSize: 12 }}>Cancel</Button>
@@ -155,7 +155,7 @@ export function RecordingPanel({ stopKey, countdownSecs, onAccept, onClose }: Re
   // ── Recording Active ──
   if (state === 'recording' || state === 'stopping') {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0', background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0', background: 'linear-gradient(137deg, #111214 4.87%, #0c0d0f 75.88%)', border: '1px solid var(--border)', borderRadius: 8, boxShadow: 'inset 0 1px 0 0 var(--border-highlight)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
           <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--error)', animation: 'blink-rec 1s infinite' }} />
           <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-primary)' }}>{state === 'stopping' ? 'Stopping…' : 'Recording'}</span>
@@ -196,7 +196,7 @@ export function RecordingPanel({ stopKey, countdownSecs, onAccept, onClose }: Re
   // ── Review ──
   if (state === 'review') {
     return (
-      <div style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(137deg, #111214 4.87%, #0c0d0f 75.88%)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden', boxShadow: 'inset 0 1px 0 0 var(--border-highlight)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: '1px solid var(--border)' }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>Review Recording</h3>
           <span style={{ fontSize: 10, background: 'var(--bg-surface-hover)', color: 'var(--text-primary)', border: '1px solid var(--border)', borderRadius: 4, padding: '2px 6px', fontFamily: 'var(--font-mono)' }}>{recordedSteps.length} steps</span>

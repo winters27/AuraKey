@@ -181,14 +181,14 @@ export default function App() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <Button
-            variant="ghost"
+            variant={paused ? 'ghost' : 'destructive'}
             size="sm"
             onClick={handleTogglePause}
             title={paused ? 'Resume macro daemon' : 'Pause daemon & cancel running macros'}
             style={{
               fontSize: 12,
               gap: 4,
-              color: paused ? 'var(--success)' : 'var(--error)',
+              ...(paused ? { color: 'var(--success)' } : {}),
             }}
           >
             {paused
@@ -220,20 +220,9 @@ export default function App() {
         overflowY: 'auto',
         overflowX: 'hidden',
         padding: 24,
-        background: 'var(--bg-base)',
+        background: 'radial-gradient(ellipse 80% 70% at 50% 30%, #0a0b14 0%, #08090f 40%, #070709 100%)',
         position: 'relative',
       }}>
-        {/* Dot grid — main panel only */}
-        <div style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
-          maskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, black 100%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 70% 70% at 50% 50%, transparent 30%, black 100%)',
-          pointerEvents: 'none',
-          zIndex: 0,
-        }} />
         <div style={{ position: 'relative', zIndex: 1 }}>
         {panel === 'editor' && selection && (
           <MacroEditor
@@ -288,6 +277,7 @@ export default function App() {
           <span style={{
             width: 6, height: 6, borderRadius: '50%',
             background: paused ? 'var(--warning)' : 'var(--success)',
+            boxShadow: paused ? '0 0 6px var(--warning)' : '0 0 6px var(--success)',
           }} />
           <span>{paused ? 'Paused' : 'Active'}</span>
         </div>
