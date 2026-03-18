@@ -599,3 +599,49 @@ pub fn browse_program() -> Option<String> {
         .map(|p| p.to_string_lossy().to_string())
 }
 
+// ========================================================================
+// Autostart Commands (Local — registry access)
+// ========================================================================
+
+const AUTOSTART_REG_KEY: &str = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Run";
+const AUTOSTART_VALUE_NAME: &str = "AuraKey";
+
+/// Set or remove the Windows auto-start registry entry.
+#[tauri::command]
+pub fn set_autostart(enabled: bool) -> Result<(), String> {
+    use winreg::enums::*;
+    use winreg::RegKey;
+
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let (key, _) = hkcu
+        .create_subkey(AUTOSTART_REG_KEY)
+        .map_err(|e| format!("Failed to open Run key: {e}"))?;
+
+    if enabled {
+        let exe_path = std::env::current_exe()
+            .map_err(|e| format!("Cannot determine exe path: {e}"))?;
+        // Quote the path and add --minimized flag so it starts to tray
+        let value = format!("\"{}\" --minimized", exe_path.display());
+        key.set_value(AUTOSTART_VALUE_NAME, &value)
+            .map_err(|e| format!("Failed to set registry value: {e}"))?;
+    } else {
+        // Ignore error if key doesn't exist
+        let _ = key.delete_value(AUTOSTART_VALUE_NAME);
+    }
+
+    Ok(())
+}
+
+/// Check if the auto-start registry entry exists.
+#[tauri::command]
+pub fn get_autostart() -> Result<bool, String> {
+    use winreg::enums::*;
+    use winreg::RegKey;
+
+    let hkcu = RegKey::predef(HKEY_CURRENT_USER);
+    let key = hkcu
+        .open_subkey(AUTOSTART_REG_KEY)
+        .map_err(|e| format!("Failed to open Run key: {e}"))?;
+
+    Ok(key.get_value::<String, _>(AUTOSTART_VALUE_NAME).is_ok())
+}

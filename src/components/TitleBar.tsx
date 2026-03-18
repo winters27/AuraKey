@@ -6,7 +6,7 @@ import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './prim
 
 const appWindow = getCurrentWindow();
 
-export function TitleBar({ children }: { children?: React.ReactNode }) {
+export function TitleBar({ children, onLogoClick }: { children?: React.ReactNode; onLogoClick?: () => void }) {
   return (
     <div
       style={{
@@ -19,15 +19,27 @@ export function TitleBar({ children }: { children?: React.ReactNode }) {
       }}
     >
       {/* Branding */}
-      <div style={{ display: 'flex', alignItems: 'center', padding: '0 12px', flexShrink: 0 }} data-tauri-drag-region>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '0 0.857rem', flexShrink: 0 }} data-tauri-drag-region>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <img src="/aura-logo.png" alt="AuraKey" style={{ width: 18, height: 18, opacity: 0.8, cursor: 'default' }} />
+              <img
+                src="/aura-logo.png"
+                alt="AuraKey"
+                onClick={onLogoClick}
+                style={{
+                  width: '1.286rem', height: '1.286rem',
+                  opacity: 0.8,
+                  cursor: onLogoClick ? 'pointer' : 'default',
+                  transition: 'opacity 150ms ease',
+                }}
+                onMouseEnter={e => { if (onLogoClick) e.currentTarget.style.opacity = '1'; }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = '0.8'; }}
+              />
             </TooltipTrigger>
             <TooltipContent side="bottom">
               <span style={{ fontWeight: 600 }}>AuraKey</span>
-              <span style={{ opacity: 0.5, marginLeft: 6, fontFamily: 'var(--font-mono)', fontSize: 10 }}>v0.1.0</span>
+              <span style={{ opacity: 0.5, marginLeft: '0.429rem', fontFamily: 'var(--font-mono)', fontSize: '0.714rem' }}>v0.1.0</span>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -35,7 +47,7 @@ export function TitleBar({ children }: { children?: React.ReactNode }) {
 
       {/* Embedded Controls */}
       {children ? (
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 8px', minWidth: 0 }} data-tauri-drag-region>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 0.571rem', minWidth: 0 }} data-tauri-drag-region>
           {children}
         </div>
       ) : (
@@ -70,7 +82,7 @@ function WindowButton({ children, onClick, isClose }: {
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: 46,
+        width: '3.286rem',
         height: '100%',
         background: 'transparent',
         border: 'none',

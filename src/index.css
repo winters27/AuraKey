@@ -2,6 +2,14 @@
    AuraKey Design System — Pure CSS + Design Tokens
    ══════════════════════════════════════════════════════════ */
 
+/* ── Responsive root ──
+   Base: 14px at 1200px viewport width (1.167vw).
+   Scales down to 12px at ~1028px and up to 16px at ~1370px.
+   Everything in rem flows from this single value. */
+html {
+  font-size: clamp(12px, 1.167vw, 16px);
+}
+
 :root {
   /* ── Surfaces ── */
   --bg-base:           #07080a;
@@ -35,25 +43,25 @@
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
 
-  --text-xs: 11px;
-  --text-sm: 13px;
-  --text-base: 14px;
-  --text-lg: 16px;
+  --text-xs: 0.786rem;   /* ~11px at 14px root */
+  --text-sm: 0.929rem;   /* ~13px */
+  --text-base: 1rem;     /* 14px  */
+  --text-lg: 1.143rem;   /* ~16px */
 
-  /* ── Spacing (4px grid) ── */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
-  --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
+  /* ── Spacing (4px grid, rem) ── */
+  --space-1: 0.286rem;   /* ~4px  */
+  --space-2: 0.571rem;   /* ~8px  */
+  --space-3: 0.857rem;   /* ~12px */
+  --space-4: 1.143rem;   /* ~16px */
+  --space-5: 1.429rem;   /* ~20px */
+  --space-6: 1.714rem;   /* ~24px */
+  --space-8: 2.286rem;   /* ~32px */
+  --space-10: 2.857rem;  /* ~40px */
 
   /* ── Radii ── */
-  --radius-sm: 5px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-sm: 0.357rem; /* ~5px  */
+  --radius-md: 0.429rem; /* ~6px  */
+  --radius-lg: 0.571rem; /* ~8px  */
 
   /* ── Transitions ── */
   --duration-fast: 120ms;
@@ -77,7 +85,7 @@
 html, body, #root {
   height: 100%;
   font-family: var(--font-sans);
-  font-size: 13px;
+  font-size: 1rem;
   color: var(--text-primary);
   background: var(--bg-base);
   -webkit-font-smoothing: antialiased;
@@ -87,8 +95,19 @@ html, body, #root {
   line-height: 1.5;
 }
 
+/* Prevent Tauri drag regions from overriding cursor on interactive children */
+[data-tauri-drag-region] button,
+[data-tauri-drag-region] select,
+[data-tauri-drag-region] input,
+[data-tauri-drag-region] a,
+[data-tauri-drag-region] img,
+[data-tauri-drag-region] [role="combobox"],
+[data-tauri-drag-region] [data-radix-collection-item] {
+  -webkit-app-region: no-drag;
+}
+
 /* ── Scrollbar ── */
-::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar { width: 0.357rem; height: 0.357rem; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
   background: rgba(140, 153, 171, 0.35);
@@ -194,18 +213,18 @@ html, body, #root {
 
 .keycap {
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 500;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   color: rgb(255, 255, 255);
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   border: none;
   background: radial-gradient(75% 75% at 50% 92%, rgb(18, 18, 18) 0px, rgb(13, 13, 13) 100%);
-  padding: 6px 12px;
-  height: 36px;
-  min-width: 36px;
+  padding: 0.429rem 0.857rem;
+  height: 2.571rem;
+  min-width: 2.571rem;
   box-shadow:
     rgba(0, 0, 0, 0.4) 0px 1px 0px 1.5px,
     rgb(0, 0, 0) 0px 0px 0.5px 0.5px,
@@ -213,7 +232,7 @@ html, body, #root {
     rgba(255, 255, 255, 0.2) 0px 1px 1px 0.5px inset;
   text-shadow: rgba(0, 0, 0, 0.1) 0px 0.5px 0.5px;
   transition: all 80ms ease;
-  margin: 0 2px 2px;
+  margin: 0 0.143rem 0.143rem;
   line-height: 1;
   letter-spacing: 0.02em;
 }
@@ -229,10 +248,10 @@ html, body, #root {
 }
 
 .keycap--lg {
-  font-size: 15px;
-  padding: 8px 16px;
-  height: 44px;
-  min-width: 44px;
+  font-size: 1.071rem;
+  padding: 0.571rem 1.143rem;
+  height: 3.143rem;
+  min-width: 3.143rem;
 }
 
 

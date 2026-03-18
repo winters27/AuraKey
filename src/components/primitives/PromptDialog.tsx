@@ -1,4 +1,4 @@
-/** PromptDialog — Themed modal replacement for window.prompt() */
+/** PromptDialog — Frosted-glass modal for naming prompts */
 
 import { useState, useEffect, useRef } from 'react';
 import { Button } from './Button';
@@ -36,25 +36,31 @@ export function PromptDialog({ open, title, placeholder, defaultValue = '', onCo
       style={{
         position: 'fixed', inset: 0, zIndex: 9999,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(0, 0, 0, 0.6)',
-        backdropFilter: 'blur(4px)',
+        background: 'rgba(7, 8, 10, 0.2)',
+        backdropFilter: 'blur(12px)',
         animation: 'fade-in 150ms ease',
       }}
       onClick={onCancel}
     >
       <div
         style={{
-          background: 'var(--bg-elevated)',
-          border: '1px solid var(--border-highlight)',
-          borderRadius: 12,
-          padding: '20px 24px',
-          width: 340,
-          boxShadow: '0 16px 48px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset',
+          background: 'linear-gradient(160deg, rgba(16, 17, 22, 0.95) 0%, rgba(10, 11, 15, 0.98) 100%)',
+          border: '1px solid rgba(255, 255, 255, 0.08)',
+          borderRadius: '0.857rem',
+          padding: '1.714rem',
+          width: '24rem',
+          boxShadow: '0 24px 64px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.03) inset, 0 0 80px rgba(45, 212, 191, 0.03)',
           animation: 'slide-up 200ms var(--ease-out)',
         }}
         onClick={e => e.stopPropagation()}
       >
-        <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 14 }}>
+        <div style={{
+          fontSize: '1.071rem',
+          fontWeight: 600,
+          color: 'var(--text-primary)',
+          marginBottom: '1.143rem',
+          letterSpacing: '-0.01em',
+        }}>
           {title}
         </div>
         <Input
@@ -66,13 +72,19 @@ export function PromptDialog({ open, title, placeholder, defaultValue = '', onCo
             if (e.key === 'Enter') handleSubmit();
             if (e.key === 'Escape') onCancel();
           }}
-          style={{ marginBottom: 16, height: 36, fontSize: 13 }}
+          style={{
+            marginBottom: '1.143rem',
+            height: '2.571rem',
+            fontSize: '0.929rem',
+            background: 'rgba(255, 255, 255, 0.03)',
+            border: '1px solid rgba(255, 255, 255, 0.08)',
+          }}
         />
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-          <Button variant="ghost" size="sm" onClick={onCancel} style={{ fontSize: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.571rem' }}>
+          <Button variant="ghost" size="sm" onClick={onCancel} style={{ fontSize: '0.857rem' }}>
             Cancel
           </Button>
-          <Button variant="primary" size="sm" onClick={handleSubmit} style={{ fontSize: 12 }}
+          <Button variant="primary" size="sm" onClick={handleSubmit} style={{ fontSize: '0.857rem' }}
             disabled={!value.trim()}>
             Create
           </Button>

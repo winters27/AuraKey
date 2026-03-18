@@ -64,6 +64,10 @@ pub enum DaemonEvent {
     Error(String),
     /// Gamepad connection status changed.
     GamepadStatus { connected: bool },
+    /// Config was changed externally (e.g. tray profile switch).
+    ConfigChanged,
+    /// Pause state was changed externally (e.g. tray pause/resume).
+    PauseChanged { paused: bool },
 }
 
 // ========================================================================

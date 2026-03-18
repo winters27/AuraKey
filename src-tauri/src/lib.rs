@@ -19,6 +19,7 @@ pub mod ipc;
 #[allow(dead_code)]
 pub mod recorder;
 mod state;
+pub mod service_main;
 pub mod tray_win32;
 
 use config::AppConfig;
@@ -26,6 +27,7 @@ use crossbeam_channel::unbounded;
 use ipc::PIPE_NAME;
 use state::AppState;
 use std::sync::Mutex;
+use tauri::Manager;
 
 
 /// Try to connect to the daemon's named pipe.
@@ -43,24 +45,16 @@ fn connect_to_daemon() -> Result<std::fs::File, String> {
     {
         Ok(file) => Ok(file),
         Err(_) => {
-            // Daemon not running — try to launch it
-            let daemon_path = std::env::current_exe()
-                .ok()
-                .and_then(|p| p.parent().map(|d| d.join("aurakey-service.exe")))
-                .ok_or_else(|| "Cannot determine daemon path".to_string())?;
+    // Daemon not running — launch ourselves in --service mode
+            let self_path = std::env::current_exe()
+                .map_err(|e| format!("Cannot determine exe path: {e}"))?;
 
-            if !daemon_path.exists() {
-                return Err(format!(
-                    "Daemon binary not found at {}",
-                    daemon_path.display()
-                ));
-            }
+            eprintln!("[AuraKey GUI] Launching service: {} --service", self_path.display());
 
-            eprintln!("[AuraKey GUI] Launching daemon: {}", daemon_path.display());
-
-            // Launch as detached process
-            let mut cmd = std::process::Command::new(&daemon_path);
-            cmd.stdin(std::process::Stdio::null())
+            // Launch as detached process in service mode
+            let mut cmd = std::process::Command::new(&self_path);
+            cmd.arg("--service")
+                .stdin(std::process::Stdio::null())
                 .stdout(std::process::Stdio::null())
                 .stderr(std::process::Stdio::inherit());
 
@@ -159,6 +153,9 @@ pub fn run() {
         recorder_result_rx: Mutex::new(recorder_result_rx),
     };
 
+    // ── Check if should start minimized (only via CLI flag from autostart) ──
+    let start_minimized = std::env::args().any(|a| a == "--minimized");
+
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
@@ -201,7 +198,17 @@ pub fn run() {
             commands::pick_coordinate,
             commands::list_installed_programs,
             commands::browse_program,
+            commands::set_autostart,
+            commands::get_autostart,
         ])
+        .setup(move |app| {
+            if start_minimized {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.hide();
+                }
+            }
+            Ok(())
+        })
         // No on_window_event close prevention — GUI actually exits
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

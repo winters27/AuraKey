@@ -5,7 +5,7 @@
 //! (in `daemon::run_daemon`) — zero extra threads needed.
 
 use crate::config::Profile;
-use crate::daemon::DaemonCommand;
+use crate::daemon::{DaemonCommand, DaemonEvent};
 use crossbeam_channel::Sender;
 use parking_lot::Mutex as ParkMutex;
 use std::sync::atomic::{AtomicIsize, Ordering};
@@ -43,6 +43,7 @@ static TRAY_HWND: AtomicIsize = AtomicIsize::new(0);
 
 struct TraySharedState {
     cmd_tx: Option<Sender<DaemonCommand>>,
+    event_tx: Option<Sender<DaemonEvent>>,
     profiles: Vec<String>,
     active_profile: String,
     paused: bool,
@@ -52,6 +53,7 @@ struct TraySharedState {
 static TRAY_STATE: LazyLock<ParkMutex<TraySharedState>> = LazyLock::new(|| {
     ParkMutex::new(TraySharedState {
         cmd_tx: None,
+        event_tx: None,
         profiles: Vec::new(),
         active_profile: String::new(),
         paused: false,
@@ -79,11 +81,12 @@ fn set_tray_hwnd(hwnd: HWND) {
 /// message pump (the daemon hook thread).
 pub fn init_tray(
     cmd_tx: Sender<DaemonCommand>,
+    event_tx: Sender<DaemonEvent>,
     profiles: &[Profile],
     active_profile: &str,
     profile_switch_fn: Box<dyn Fn(&str) + Send + Sync>,
 ) {
-    // Determine GUI exe path (same dir as daemon, named aurakey.exe)
+    // Determine GUI exe path (same dir as service, named aurakey.exe)
     let gui_path = std::env::current_exe()
         .ok()
         .and_then(|p| p.parent().map(|d| d.join("aurakey.exe").to_string_lossy().to_string()))
@@ -92,6 +95,7 @@ pub fn init_tray(
     {
         let mut state = TRAY_STATE.lock();
         state.cmd_tx = Some(cmd_tx);
+        state.event_tx = Some(event_tx);
         state.profiles = profiles.iter().map(|p| p.name.clone()).collect();
         state.active_profile = active_profile.to_string();
         state.gui_exe_path = gui_path;
@@ -211,7 +215,7 @@ unsafe fn create_tray_window() {
     let hwnd = CreateWindowExW(
         WINDOW_EX_STYLE::default(),
         class_name,
-        w!("AuraKey Daemon"),
+        w!("AuraKey"),
         WS_OVERLAPPED,
         0, 0, 0, 0,
         None,  // no parent
@@ -237,7 +241,7 @@ unsafe fn create_tray_window() {
     }
 
     // Set tooltip
-    let tip = "AuraKey Daemon";
+    let tip = "AuraKey";
     let tip_wide: Vec<u16> = tip.encode_utf16().chain(std::iter::once(0)).collect();
     let copy_len = tip_wide.len().min(nid.szTip.len());
     nid.szTip[..copy_len].copy_from_slice(&tip_wide[..copy_len]);
@@ -339,13 +343,17 @@ fn handle_menu_command(id: u16) {
         ID_PAUSE => {
             let mut state = TRAY_STATE.lock();
             state.paused = !state.paused;
+            let paused = state.paused;
             if let Some(tx) = &state.cmd_tx {
-                let cmd = if state.paused {
+                let cmd = if paused {
                     DaemonCommand::Pause
                 } else {
                     DaemonCommand::Resume
                 };
                 let _ = tx.send(cmd);
+            }
+            if let Some(etx) = &state.event_tx {
+                let _ = etx.send(DaemonEvent::PauseChanged { paused });
             }
         }
         ID_QUIT => {
@@ -361,9 +369,17 @@ fn handle_menu_command(id: u16) {
                 state.profiles.get(idx).cloned()
             };
             if let Some(name) = name {
-                TRAY_STATE.lock().active_profile = name.clone();
+                {
+                    let mut state = TRAY_STATE.lock();
+                    state.active_profile = name.clone();
+                }
                 if let Some(f) = PROFILE_SWITCH_FN.lock().as_ref() {
                     f(&name);
+                }
+                // Notify GUI of config change
+                let state = TRAY_STATE.lock();
+                if let Some(etx) = &state.event_tx {
+                    let _ = etx.send(DaemonEvent::ConfigChanged);
                 }
             }
         }

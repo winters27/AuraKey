@@ -191,3 +191,11 @@ export async function listInstalledPrograms(): Promise<InstalledProgram[]> {
 export async function browseProgram(): Promise<string | null> {
   return invoke<string | null>('browse_program');
 }
+
+export async function setAutostart(enabled: boolean): Promise<void> {
+  return invoke<void>('set_autostart', { enabled });
+}
+
+export async function getAutostart(): Promise<boolean> {
+  return invoke<boolean>('get_autostart');
+}

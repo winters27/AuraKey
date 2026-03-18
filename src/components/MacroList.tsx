@@ -217,29 +217,29 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '8px 10px',
+        padding: '0.571rem 0.714rem',
         borderBottom: '1px solid var(--border)',
       }}>
-        <span style={{ fontSize: 11, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Macros</span>
-        <Button variant="ghost" size="xs" onClick={handleCreateGroup} style={{ fontSize: 11, gap: 4 }}>
+        <span style={{ fontSize: '0.786rem', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)' }}>Macros</span>
+        <Button variant="ghost" size="xs" onClick={handleCreateGroup} style={{ fontSize: '0.786rem', gap: '0.286rem' }}>
           <Plus size={12} />Group
         </Button>
       </div>
 
       {/* Search */}
-      <div style={{ position: 'relative', padding: '6px 10px' }}>
+      <div style={{ position: 'relative', padding: '0.429rem 0.714rem' }}>
         <Input
           placeholder="Search macros…"
           value={search}
           onChange={e => setSearch(e.target.value)}
-          style={{ height: 28, fontSize: 12, paddingRight: 28 }}
+          style={{ height: '2rem', fontSize: '0.857rem', paddingRight: '2rem' }}
         />
         {search && (
           <button
             onClick={() => setSearch('')}
             style={{
-              position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
-              background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: 2,
+              position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)',
+              background: 'none', border: 'none', color: 'var(--text-tertiary)', cursor: 'pointer', padding: '0.143rem',
             }}
           >
             <X size={10} />
@@ -249,7 +249,7 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
 
       {/* Groups & Macros */}
       <ScrollArea style={{ flex: 1 }}>
-        <div style={{ paddingBottom: 8 }}>
+        <div style={{ paddingBottom: '0.571rem' }}>
           {profile.groups.map((group, gIdx) => {
             const isCollapsed = collapsed[gIdx] ?? false;
 
@@ -264,7 +264,7 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
               <div
                 key={`group-${gIdx}`}
                 style={{
-                  marginBottom: 4,
+                  marginBottom: '0.286rem',
                   ...(dragOverGroup === gIdx ? { background: 'rgba(255,255,255,0.03)', borderRadius: 6 } : {}),
                 }}
                 onDragOver={e => handleGroupDragOver(e, gIdx)}
@@ -276,9 +276,9 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: 8,
-                    padding: '6px 10px',
-                    fontSize: 13,
+                    gap: '0.571rem',
+                    padding: '0.429rem 0.714rem',
+                    fontSize: '0.929rem',
                     fontWeight: 500,
                     color: 'var(--text-secondary)',
                     cursor: 'pointer',
@@ -289,13 +289,13 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }}
                 >
                   <span style={{
-                    fontSize: 10,
+                    fontSize: '0.714rem',
                     transition: 'transform 150ms',
                     transform: isCollapsed ? 'rotate(0deg)' : 'rotate(90deg)',
                     display: 'inline-block',
                   }}>▸</span>
                   <span style={{ flex: 1 }}>{group.name}</span>
-                  <span style={{ fontSize: 11, color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{group.macros.length}</span>
+                  <span style={{ fontSize: '0.786rem', color: 'var(--text-tertiary)', fontFamily: 'var(--font-mono)', fontVariantNumeric: 'tabular-nums' }}>{group.macros.length}</span>
                   <Switch
                     checked={group.enabled}
                     onCheckedChange={(checked) => handleToggleGroup(gIdx, checked)}
@@ -313,11 +313,11 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
                         <Plus size={10} />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" style={{ minWidth: 150 }}>
-                      <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={() => handleCreateMacro(gIdx)}>
+                    <DropdownMenuContent align="end" style={{ minWidth: '10.714rem' }}>
+                      <DropdownMenuItem style={{ fontSize: '0.857rem', gap: '0.571rem' }} onSelect={() => handleCreateMacro(gIdx)}>
                         <Plus size={12} /> New Macro
                       </DropdownMenuItem>
-                      <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={async () => {
+                      <DropdownMenuItem style={{ fontSize: '0.857rem', gap: '0.571rem' }} onSelect={async () => {
                         const file = await open({
                           title: 'Import Macro',
                           filters: [{ name: 'AuraKey Macros', extensions: ['akg', 'toml', 'json'] }],
@@ -398,16 +398,16 @@ export function MacroList({ config, selection, onSelect, onConfigUpdate }: Macro
           onMouseDown={e => e.stopPropagation()}
           style={{
             position: 'fixed', left: ctxMenu.x, top: ctxMenu.y, zIndex: 9999,
-            minWidth: 160, padding: 4,
+            minWidth: '11.429rem', padding: '0.286rem',
             background: 'rgba(20, 20, 22, 0.85)', backdropFilter: 'blur(16px)',
-            border: '1px solid var(--border)', borderRadius: 8,
+            border: '1px solid var(--border)', borderRadius: '0.571rem',
             boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
           }}
         >
           <CtxMenuItem icon={<Pencil size={13} />} label="Rename" onClick={handleCtxRename} />
           <CtxMenuItem icon={<Copy size={13} />} label="Duplicate" onClick={handleCtxDuplicate} />
           <CtxMenuItem icon={<Upload size={13} />} label="Export Macro" onClick={handleCtxExport} />
-          <div style={{ height: 1, background: 'var(--border)', margin: '4px 6px' }} />
+          <div style={{ height: 1, background: 'var(--border)', margin: '0.286rem 0.429rem' }} />
           <CtxMenuItem icon={<Trash2 size={13} />} label="Delete" onClick={handleCtxDelete} danger />
         </div>
       )}
@@ -425,8 +425,8 @@ function CtxMenuItem({ icon, label, onClick, danger }: { icon: React.ReactNode; 
       onMouseLeave={() => setHov(false)}
       style={{
         display: 'flex', alignItems: 'center', gap: 8,
-        padding: '7px 10px', borderRadius: 5, cursor: 'default',
-        fontSize: 12, fontWeight: 500,
+        padding: '0.5rem 0.714rem', borderRadius: '0.357rem', cursor: 'default',
+        fontSize: '0.857rem', fontWeight: 500,
         color: danger ? 'var(--destructive, #ef4444)' : 'var(--text-primary)',
         background: hov ? 'rgba(255,255,255,0.06)' : 'transparent',
         transition: 'background 80ms',
@@ -457,8 +457,8 @@ function MacroItem({ macro, isActive, isRenaming, renameValue, renameInputRef, g
       style={{
         display: 'flex',
         alignItems: 'center',
-        gap: 12,
-        padding: '6px 12px 6px 24px',
+        gap: '0.857rem',
+        padding: '0.429rem 0.857rem 0.429rem 1.714rem',
         cursor: 'default',
         borderRadius: 6,
         position: 'relative',
@@ -491,17 +491,17 @@ function MacroItem({ macro, isActive, isRenaming, renameValue, renameInputRef, g
             onBlur={onCommitRename}
             onClick={e => e.stopPropagation()}
             style={{
-              width: '100%', fontSize: 13, fontWeight: 500, fontFamily: 'inherit',
+              width: '100%', fontSize: '0.929rem', fontWeight: 500, fontFamily: 'inherit',
               color: 'var(--text-primary)', background: 'var(--bg-surface)',
-              border: '1px solid var(--accent)', borderRadius: 4,
-              padding: '2px 6px', outline: 'none',
+              border: '1px solid var(--accent)', borderRadius: '0.286rem',
+              padding: '0.143rem 0.429rem', outline: 'none',
               boxShadow: '0 0 0 3px var(--accent-muted)',
             }}
           />
         ) : (
           <div
             style={{
-              fontSize: 13, fontWeight: 500, color: 'var(--text-primary)',
+              fontSize: '0.929rem', fontWeight: 500, color: 'var(--text-primary)',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}
             onDoubleClick={e => { e.stopPropagation(); onStartRename(); }}
@@ -509,17 +509,17 @@ function MacroItem({ macro, isActive, isRenaming, renameValue, renameInputRef, g
             {macro.name}
           </div>
         )}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 2 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.286rem', marginTop: '0.143rem' }}>
           {(macro.trigger.trigger_sets || []).map((chord: number[], ci: number) => (
             <span key={ci} style={{ display: 'inline-flex', alignItems: 'center', gap: 2 }}>
-              {ci > 0 && <span style={{ fontSize: 9, color: 'var(--text-tertiary)', margin: '0 2px' }}>or</span>}
+              {ci > 0 && <span style={{ fontSize: '0.643rem', color: 'var(--text-tertiary)', margin: '0 0.143rem' }}>or</span>}
               {chord.filter((v: number) => !isGamepadVk(v)).length > 0 && (
                 <KeycapRow keys={chord.filter((v: number) => !isGamepadVk(v))} />
               )}
               {chord.filter((v: number) => isGamepadVk(v)).map((v: number) => {
                 const btn = getGamepadButton(v);
                 return btn ? (
-                  <img key={v} src={`/gamepad/${btn.img}`} alt={btn.name} style={{ width: 44, height: 44, verticalAlign: 'middle' }} />
+                  <img key={v} src={`/gamepad/${btn.img}`} alt={btn.name} style={{ width: '3.143rem', height: '3.143rem', verticalAlign: 'middle' }} />
                 ) : null;
               })}
             </span>

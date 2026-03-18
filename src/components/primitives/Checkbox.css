@@ -1,11 +1,11 @@
 .checkbox {
-  width: 16px;
-  height: 16px;
+  width: 1.143rem;
+  height: 1.143rem;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1.5px solid var(--border);
-  border-radius: 4px;
+  border-radius: 0.286rem;
   background: var(--bg-surface);
   cursor: pointer;
   flex-shrink: 0;

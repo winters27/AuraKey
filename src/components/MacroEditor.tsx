@@ -282,7 +282,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
         onChange={e => { const n = Number(e.target.value); if (!isNaN(n)) onChange(n); }}
         onClick={e => e.stopPropagation()}
         style={{
-          width: 56, height: 26, fontSize: 12, textAlign: 'center',
+          width: '4rem', height: '1.857rem', fontSize: '0.857rem', textAlign: 'center',
           background: 'rgba(255,255,255,0.04)', border: '1px solid var(--border)',
           borderRadius: 4, color: 'var(--text-primary)', fontFamily: 'var(--font-mono)',
           outline: 'none', padding: '0 4px',
@@ -418,7 +418,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
 
   return (
     <TooltipProvider>
-    <div style={{ width: '100%', maxWidth: 720, margin: '0 auto', minHeight: '100%' }}>
+    <div style={{ width: '100%', maxWidth: '51.429rem', margin: '0 auto', minHeight: '100%' }}>
       {/* Header */}
       <div style={{ marginBottom: 32, paddingBottom: 16, borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -455,7 +455,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
             </TooltipContent>
           </Tooltip>
 
-          <div style={{ width: 1, height: 14, background: 'var(--border)', margin: '0 4px' }} />
+          <div style={{ width: 1, height: '1rem', background: 'var(--border)', margin: '0 0.286rem' }} />
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Switch
@@ -518,7 +518,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
                         if (gpBtn) {
                           return (
                             <img key={`${chordIdx}-${vkIdx}`} src={`/gamepad/${gpBtn.img}`} alt={gpBtn.name}
-                              style={{ width: 32, height: 32, filter: 'brightness(0.9)', opacity: 0.9, pointerEvents: 'none' }} />
+                              style={{ width: '2.286rem', height: '2.286rem', filter: 'brightness(0.9)', opacity: 0.9, pointerEvents: 'none' }} />
                           );
                         }
                         return <Keycap key={`${chordIdx}-${vkIdx}`} vk={vk} size="lg" />;
@@ -532,7 +532,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
                           }}
                           style={{
                             position: 'absolute', top: -6, right: -6,
-                            width: 16, height: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            width: '1.143rem', height: '1.143rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
                             background: 'var(--bg-surface)', border: '1px solid var(--border)', borderRadius: '50%',
                             cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 10, lineHeight: 1,
                             transition: 'all 120ms', opacity: 0,
@@ -575,7 +575,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
                 <button
                   onClick={() => setAddingAlternate(true)}
                   style={{
-                    width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: '2rem', height: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center',
                     border: '1px dashed var(--border)', borderRadius: 6, background: 'transparent',
                     cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: 14, fontWeight: 300,
                     transition: 'all 150ms', flexShrink: 0,
@@ -602,7 +602,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Activation Style</label>
             <Select value={draft.trigger.mode} onValueChange={v => update({ trigger: { ...draft.trigger, mode: v as MacroDef['trigger']['mode'] } })}>
-              <SelectTrigger style={{ width: 160, height: 32, fontSize: 13 }}>
+              <SelectTrigger style={{ width: '11.429rem', height: '2.286rem', fontSize: '0.929rem' }}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -614,7 +614,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
           {draft.trigger.mode === 'double_tap' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Window (ms)</label>
-              <Input type="number" style={{ width: 100, height: 32, fontSize: 13 }}
+              <Input type="number" style={{ width: '7.143rem', height: '2.286rem', fontSize: '0.929rem' }}
                 value={draft.trigger.timeout_ms}
                 onChange={e => update({ trigger: { ...draft.trigger, timeout_ms: Number(e.target.value) } })} />
             </div>
@@ -640,7 +640,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               <label style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>Repeat Type</label>
               <Select value={draft.execution.pattern} onValueChange={v => update({ execution: { ...draft.execution, pattern: v as 'key_cycle' | 'mouse_oscillate' } })}>
-                <SelectTrigger style={{ width: 180, height: 32, fontSize: 13 }}>
+                <SelectTrigger style={{ width: '12.857rem', height: '2.286rem', fontSize: '0.929rem' }}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -692,7 +692,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
 
               {/* Preview */}
               <div style={{ background: 'var(--bg-base)', borderRadius: 8, padding: 10, marginBottom: 12, border: '1px solid var(--border)' }}>
-                <svg viewBox="0 0 240 120" style={{ width: '100%', height: 170, display: 'block' }}>
+                <svg viewBox="0 0 240 120" style={{ width: '100%', height: '12.143rem', display: 'block' }}>
                   {(() => {
                     const W = 240, H = 120;
                     const amp = Math.abs(draft.execution.amplitude || 0);
@@ -763,7 +763,7 @@ export function MacroEditor({ config, selection, onConfigUpdate, onClearSelectio
                       </TooltipContent>
                     </Tooltip>
                   </div>
-                  <Input type="number" style={{ width: 80, height: 32, fontSize: 13 }}
+                  <Input type="number" style={{ width: '5.714rem', height: '2.286rem', fontSize: '0.929rem' }}
                     value={draft.execution.amplitude} min={0}
                     onChange={e => update({ execution: { ...draft.execution, amplitude: Number(e.target.value) } })} />
                 </div>
@@ -946,7 +946,7 @@ function StepRow({ idx, isCollapsed, isDragging, onPointerDown, stepTypeName, st
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 14px', minWidth: 0 }}>
         <span style={{ color: 'var(--text-tertiary)', cursor: 'grab', flexShrink: 0 }} title="Drag to reorder"><GripVertical size={14} /></span>
-        <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'var(--text-tertiary)', width: 16, textAlign: 'center', flexShrink: 0 }}>{idx + 1}</span>
+        <span style={{ fontSize: '0.714rem', fontFamily: 'var(--font-mono)', color: 'var(--text-tertiary)', width: '1.143rem', textAlign: 'center', flexShrink: 0 }}>{idx + 1}</span>
         <span style={{ fontSize: 13, fontFamily: 'var(--font-mono)', fontWeight: 600, color: 'var(--accent)', flexShrink: 0, textTransform: 'uppercase', letterSpacing: '0.03em' }}>{stepTypeName}</span>
         <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, overflow: 'hidden', flexWrap: 'wrap' }}>
           {stepSentence.before}

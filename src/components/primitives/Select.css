@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
-  height: 32px;
+  height: 2.286rem;
   padding: 0 var(--space-2) 0 var(--space-3);
   font-family: var(--font-sans);
   font-size: var(--text-sm);
@@ -52,7 +52,7 @@
 .select-item {
   display: flex;
   align-items: center;
-  padding: 6px var(--space-2);
+  padding: 0.429rem var(--space-2);
   font-size: var(--text-sm);
   color: var(--text-primary);
   border-radius: var(--radius-sm);

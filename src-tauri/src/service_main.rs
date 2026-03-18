@@ -1,18 +1,15 @@
-//! AuraKey Daemon — Standalone Background Process
+//! AuraKey Daemon — Background Service Mode
 //!
-//! Pure Rust binary (no Tauri/webview). Runs the hotkey daemon, tray icon,
+//! Pure Rust service (no Tauri/webview). Runs the hotkey daemon, tray icon,
 //! Arduino HID, and a named pipe IPC server for the GUI.
 //!
-//! Build: `cargo build --bin aurakey-service --no-default-features`
+//! Invoked via `aurakey.exe --service`
 
-#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-
-// Share the library crate
-use aurakey_lib::config::{self, AppConfig, AppSettings, MacroDef, MacroGroup, Profile};
-use aurakey_lib::daemon::{DaemonCommand, DaemonEvent};
-use aurakey_lib::ipc::{self, IpcRequest, IpcResponse, PIPE_NAME};
-use aurakey_lib::tray_win32;
-use aurakey_lib::{arduino, input};
+use crate::config::{self, AppConfig, MacroDef, MacroGroup, Profile};
+use crate::daemon::{DaemonCommand, DaemonEvent};
+use crate::ipc::{self, IpcRequest, IpcResponse, PIPE_NAME};
+use crate::tray_win32;
+use crate::{arduino, input};
 use crossbeam_channel::{unbounded, Receiver, Sender};
 use std::io;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -32,7 +29,7 @@ fn run_ipc_server(
     paused: Arc<AtomicBool>,
 ) {
     use windows::Win32::Foundation::INVALID_HANDLE_VALUE;
-    use windows::Win32::Storage::FileSystem::{ReadFile, WriteFile, FlushFileBuffers};
+    use windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES;
     use windows::Win32::System::Pipes::{
         ConnectNamedPipe, CreateNamedPipeW, DisconnectNamedPipe,
         PIPE_TYPE_BYTE, PIPE_READMODE_BYTE, PIPE_WAIT,
@@ -51,7 +48,7 @@ fn run_ipc_server(
                 PCWSTR(pipe_name_wide.as_ptr()),
                 windows::Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES(PIPE_ACCESS_DUPLEX),
                 PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT,
-                1,          // max instances
+                255,        // max instances (allow immediate re-creation)
                 4096,       // out buffer
                 4096,       // in buffer
                 0,          // default timeout
@@ -60,7 +57,7 @@ fn run_ipc_server(
         };
 
         if pipe == INVALID_HANDLE_VALUE {
-            eprintln!("[AuraKey Daemon] Failed to create pipe: {}", io::Error::last_os_error());
+            eprintln!("[AuraKey] Failed to create pipe: {}", io::Error::last_os_error());
             std::thread::sleep(std::time::Duration::from_secs(1));
             continue;
         }
@@ -71,7 +68,7 @@ fn run_ipc_server(
             // ERROR_PIPE_CONNECTED (535) means client connected between Create and Connect — that's OK
             let err = io::Error::last_os_error();
             if err.raw_os_error() != Some(535) {
-                eprintln!("[AuraKey Daemon] ConnectNamedPipe failed: {err}");
+                eprintln!("[AuraKey] ConnectNamedPipe failed: {err}");
                 unsafe {
                     let _ = windows::Win32::Foundation::CloseHandle(pipe);
                 }
@@ -79,7 +76,7 @@ fn run_ipc_server(
             }
         }
 
-        eprintln!("[AuraKey Daemon] GUI connected via pipe");
+        eprintln!("[AuraKey] GUI connected via pipe");
 
         // Wrap the HANDLE in a Read+Write adapter
         let mut pipe_io = PipeStream(pipe);
@@ -96,7 +93,7 @@ fn run_ipc_server(
                         &paused,
                     );
                     if let Err(e) = ipc::write_response(&mut pipe_io, &response) {
-                        eprintln!("[AuraKey Daemon] Write response failed: {e}");
+                        eprintln!("[AuraKey] Write response failed: {e}");
                         break;
                     }
                 }
@@ -104,9 +101,9 @@ fn run_ipc_server(
                     if e.kind() == io::ErrorKind::BrokenPipe
                         || e.kind() == io::ErrorKind::UnexpectedEof
                     {
-                        eprintln!("[AuraKey Daemon] GUI disconnected");
+                        eprintln!("[AuraKey] GUI disconnected");
                     } else {
-                        eprintln!("[AuraKey Daemon] Read request failed: {e}");
+                        eprintln!("[AuraKey] Read request failed: {e}");
                     }
                     break;
                 }
@@ -533,20 +530,20 @@ fn reload_daemon(config: &AppConfig, daemon_cmd_tx: &Sender<DaemonCommand>) {
 // Main
 // ========================================================================
 
-fn main() {
-    eprintln!("[AuraKey Daemon] Starting...");
+pub fn run_service() {
+    eprintln!("[AuraKey] Starting...");
 
     // ── Panic hook: release all held keys ────────────────────
     let default_hook = std::panic::take_hook();
     std::panic::set_hook(Box::new(move |info| {
-        eprintln!("[AuraKey Daemon PANIC] Releasing all held keys...");
+        eprintln!("[AuraKey PANIC] Releasing all held keys...");
         input::release_all_held_keys();
         default_hook(info);
     }));
 
     // ── Load config ──────────────────────────────────────────
     let config = config::load_config().unwrap_or_else(|e| {
-        eprintln!("[AuraKey Daemon] Failed to load config: {e}, using defaults");
+        eprintln!("[AuraKey] Failed to load config: {e}, using defaults");
         AppConfig::default()
     });
 
@@ -568,7 +565,7 @@ fn main() {
         if cfg.settings.arduino.auto_connect && !cfg.settings.arduino.port.is_empty() {
             let port = cfg.settings.arduino.port.clone();
             if arduino::connect(&port).is_ok() {
-                eprintln!("[AuraKey Daemon] Arduino connected to {port}");
+                eprintln!("[AuraKey] Arduino connected to {port}");
             }
             arduino::start_auto_reconnect(port);
         }
@@ -579,11 +576,13 @@ fn main() {
     // (the daemon hook thread). We'll do it before entering run_daemon.
     {
         let cmd_tx = daemon_cmd_tx.clone();
+        let evt_tx = daemon_event_tx.clone();
         let cfg_ref = config.clone();
         let daemon_cmd_tx_switch = daemon_cmd_tx.clone();
 
         tray_win32::init_tray(
             cmd_tx,
+            evt_tx,
             &profiles_snapshot,
             &active_name,
             Box::new(move |name: &str| {
@@ -616,14 +615,14 @@ fn main() {
             .expect("Failed to spawn IPC server thread");
     }
 
-    eprintln!("[AuraKey Daemon] Daemon running. Tray icon active.");
+    eprintln!("[AuraKey] Service running. Tray icon active.");
 
     // ── Run daemon on this thread (has the message pump) ─────
     // This blocks until DaemonCommand::Shutdown is received.
-    aurakey_lib::daemon::run_daemon(daemon_cmd_rx, daemon_event_tx, initial_profile);
+    crate::daemon::run_daemon(daemon_cmd_rx, daemon_event_tx, initial_profile);
 
     // ── Cleanup ──────────────────────────────────────────────
     tray_win32::destroy_tray();
     input::release_all_held_keys();
-    eprintln!("[AuraKey Daemon] Shutdown complete.");
+    eprintln!("[AuraKey] Shutdown complete.");
 }

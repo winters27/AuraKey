@@ -2,16 +2,19 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import type { AppConfig, MacroSelection } from './types/config';
-import { getConfig, togglePause, cancelAll } from './hooks/useTauri';
+import { getConfig, togglePause, cancelAll, createMacro, updateMacro, createGroup, arduinoIsConnected, getDaemonEvents } from './hooks/useTauri';
 import { TitleBar } from './components/TitleBar';
 import { MacroList } from './components/MacroList';
 import { MacroEditor } from './components/MacroEditor';
 import { SettingsPanel } from './components/SettingsPanel';
+import { KeyboardLayout } from './components/KeyboardLayout';
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from './components/primitives/Tooltip';
 import { Button } from './components/primitives/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './components/primitives/Select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './components/primitives/DropdownMenu';
 import { PromptDialog } from './components/primitives/PromptDialog';
-import { Settings, Ellipsis, Plus, Pencil, Trash2, Import, Upload } from 'lucide-react';
+import { Ellipsis, Plus, Pencil, Trash2, Import, Upload, Plug } from 'lucide-react';
+import { useRef } from 'react';
 import './index.css';
 
 type RightPanel = 'editor' | 'settings' | 'none';
@@ -27,6 +30,8 @@ export default function App() {
   const [promptPlaceholder, setPromptPlaceholder] = useState('');
   const [promptDefault, setPromptDefault] = useState('');
   const [promptCallback, setPromptCallback] = useState<((v: string) => void) | null>(null);
+  const pendingKeyVk = useRef<number | null>(null);
+  const [hwConnected, setHwConnected] = useState(false);
 
   useEffect(() => {
     getConfig()
@@ -50,6 +55,39 @@ export default function App() {
     };
     document.addEventListener('contextmenu', handler);
     return () => document.removeEventListener('contextmenu', handler);
+  }, []);
+
+  // Poll Arduino HID connection status
+  useEffect(() => {
+    const check = () => arduinoIsConnected().then(setHwConnected).catch(() => setHwConnected(false));
+    check();
+    const id = setInterval(check, 3000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Poll daemon events for tray-initiated changes (profile switch, pause)
+  useEffect(() => {
+    const poll = async () => {
+      try {
+        const events = await getDaemonEvents();
+        for (const evt of events) {
+          const e = evt as Record<string, unknown>;
+          if ('ConfigChanged' in e || evt === 'ConfigChanged') {
+            // Tray switched the active profile — re-fetch config
+            const freshConfig = await getConfig();
+            setConfig(freshConfig);
+            setSelection(null);
+            setPanel('none');
+          }
+          if (typeof e === 'object' && 'PauseChanged' in e) {
+            const inner = e.PauseChanged as { paused: boolean };
+            setPaused(inner.paused);
+          }
+        }
+      } catch {}
+    };
+    const id = setInterval(poll, 1000);
+    return () => clearInterval(id);
   }, []);
 
   // Disable dev tools shortcuts (F12, Ctrl+Shift+I, Ctrl+Shift+J)
@@ -85,6 +123,18 @@ export default function App() {
     setConfig(newConfig);
   }, []);
 
+  // Reset to keyboard screen if the selected macro no longer exists
+  useEffect(() => {
+    if (panel === 'editor' && selection && config) {
+      const profile = config.profiles.find(p => p.name === config.active_profile) ?? config.profiles[0];
+      const macro = profile?.groups[selection.groupIdx]?.macros[selection.macroIdx];
+      if (!macro) {
+        setSelection(null);
+        setPanel('none');
+      }
+    }
+  }, [config, panel, selection]);
+
   const handleSelect = useCallback((sel: MacroSelection) => {
     setSelection(sel);
     setPanel('editor');
@@ -104,7 +154,7 @@ export default function App() {
   if (loading) {
     return (
       <div style={{ display: 'grid', placeItems: 'center', height: '100vh', background: 'var(--bg-base)' }}>
-        <div style={{ color: 'var(--text-secondary)', fontSize: 14 }}>Loading…</div>
+        <div style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>Loading…</div>
       </div>
     );
   }
@@ -112,7 +162,7 @@ export default function App() {
   if (!config) {
     return (
       <div style={{ display: 'grid', placeItems: 'center', height: '100vh', background: 'var(--bg-base)' }}>
-        <div style={{ color: 'var(--error)', fontSize: 14 }}>Failed to load configuration</div>
+        <div style={{ color: 'var(--error)', fontSize: '1rem' }}>Failed to load configuration</div>
       </div>
     );
   }
@@ -120,13 +170,13 @@ export default function App() {
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: '280px 1fr',
-      gridTemplateRows: '40px 1fr 28px',
+      gridTemplateColumns: '20rem 1fr',
+      gridTemplateRows: '2.857rem 1fr 2rem',
       height: '100vh',
     }}>
       {/* ── Title Bar (with embedded controls) ── */}
-      <TitleBar>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <TitleBar onLogoClick={() => setPanel(panel === 'settings' ? 'none' : 'settings')}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.571rem' }}>
           <Select
             value={config.active_profile}
             onValueChange={async (val) => {
@@ -136,26 +186,26 @@ export default function App() {
               handleConfigUpdate(updated);
             }}
           >
-            <SelectTrigger style={{ height: 28, width: 180, fontSize: 12 }}>
+            <SelectTrigger style={{ height: '2rem', width: '12.857rem', fontSize: '0.857rem' }}>
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
               {config.profiles.map(p => (
-                <SelectItem key={p.name} value={p.name} style={{ fontSize: 12 }}>{p.name}</SelectItem>
+                <SelectItem key={p.name} value={p.name} style={{ fontSize: '0.857rem' }}>{p.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" style={{ height: 28, width: 28, color: 'var(--text-secondary)', cursor: 'pointer' }}
+              <Button variant="ghost" size="icon" style={{ height: '2rem', width: '2rem', color: 'var(--text-secondary)', cursor: 'pointer' }}
                 onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
               >                <Ellipsis size={14} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" style={{ minWidth: 160 }}>
-              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={() => {
+            <DropdownMenuContent align="start" style={{ minWidth: '11.429rem' }}>
+              <DropdownMenuItem style={{ fontSize: '0.857rem', gap: '0.571rem' }} onSelect={() => {
                 setPromptTitle('New Profile');
                 setPromptPlaceholder('Profile name');
                 setPromptDefault('');
@@ -172,7 +222,7 @@ export default function App() {
               }}>
                 <Plus size={12} /> New Profile
               </DropdownMenuItem>
-              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={() => {
+              <DropdownMenuItem style={{ fontSize: '0.857rem', gap: '0.571rem' }} onSelect={() => {
                 setPromptTitle('Rename Profile');
                 setPromptPlaceholder('Profile name');
                 setPromptDefault(config.active_profile);
@@ -189,7 +239,7 @@ export default function App() {
               }}>
                 <Pencil size={12} /> Rename
               </DropdownMenuItem>
-              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={async () => {
+              <DropdownMenuItem style={{ fontSize: '0.857rem', gap: '0.571rem' }} onSelect={async () => {
                 const { open } = await import('@tauri-apps/plugin-dialog');
                 const { importMacros } = await import('./hooks/useTauri');
                 const file = await open({
@@ -205,7 +255,7 @@ export default function App() {
               }}>
                 <Import size={12} /> Import
               </DropdownMenuItem>
-              <DropdownMenuItem style={{ fontSize: 12, gap: 8 }} onSelect={async () => {
+              <DropdownMenuItem style={{ fontSize: '0.857rem', gap: '0.571rem' }} onSelect={async () => {
                 const { save } = await import('@tauri-apps/plugin-dialog');
                 const { exportProfile } = await import('./hooks/useTauri');
                 const file = await save({
@@ -220,7 +270,7 @@ export default function App() {
                 <Upload size={12} /> Export
               </DropdownMenuItem>
               <DropdownMenuItem
-                style={{ fontSize: 12, gap: 8, color: 'var(--error)' }}
+                style={{ fontSize: '0.857rem', gap: '0.571rem', color: 'var(--error)' }}
                 disabled={config.profiles.length <= 1}
                 onSelect={async () => {
                   if (!confirm(`Delete profile "${config.active_profile}"?`)) return;
@@ -237,59 +287,6 @@ export default function App() {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Button
-            variant={paused ? 'outline' : 'outline'}
-            size="sm"
-            onClick={handleTogglePause}
-            title={paused ? 'Resume macro daemon' : 'Pause daemon & cancel running macros'}
-            style={{
-              fontSize: 12,
-              gap: 6,
-              cursor: 'pointer',
-              color: 'var(--text-primary)',
-              ...(paused
-                ? { background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.25)' }
-                : { background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.25)' }
-              ),
-            }}
-          >
-            {paused ? (
-              <>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: 'var(--success)',
-                  display: 'inline-block', flexShrink: 0,
-                }} />
-                Start
-              </>
-            ) : (
-              <>
-                <span style={{
-                  width: 8, height: 8, borderRadius: '50%',
-                  background: '#ef4444',
-                  display: 'inline-block', flexShrink: 0,
-                  animation: 'pulse-dot 2s ease-in-out infinite',
-                }} />
-                Stop
-              </>
-            )}
-          </Button>
-
-          <style>{`@keyframes pulse-dot { 0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(239,68,68,0.5); } 50% { opacity: 0.7; box-shadow: 0 0 8px 3px rgba(239,68,68,0.3); } }`}</style>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setPanel(panel === 'settings' ? 'none' : 'settings')}
-            style={{ height: 28, width: 28, color: 'var(--text-secondary)', cursor: 'pointer' }}
-            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; }}
-            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; }}
-          >
-            <Settings size={14} />
-          </Button>
-        </div>
       </TitleBar>
 
       {/* ── Sidebar ── */}
@@ -304,11 +301,13 @@ export default function App() {
       <div style={{
         overflowY: 'auto',
         overflowX: 'hidden',
-        padding: 24,
+        padding: '1.714rem',
         background: 'radial-gradient(ellipse 80% 70% at 50% 30%, #0a0b14 0%, #08090f 40%, #070709 100%)',
         position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
       }}>
-        <div style={{ position: 'relative', zIndex: 1 }}>
+        <div style={{ position: 'relative', zIndex: 1, flex: 1, display: 'flex', flexDirection: 'column' }}>
         {panel === 'editor' && selection && (
           <MacroEditor
             config={config}
@@ -325,46 +324,111 @@ export default function App() {
           />
         )}
 
-        {panel === 'none' && (
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            height: '100%',
-            gap: 16,
-            color: 'var(--text-tertiary)',
-          }}>
-            <div style={{ fontSize: 30, opacity: 0.2 }}>⌨</div>
-            <div style={{ fontSize: 13 }}>Select a macro to edit</div>
-            <div style={{ fontSize: 11, opacity: 0.6 }}>
-              Or create a new one with the + button in the sidebar
-            </div>
-          </div>
+        {panel === 'none' && config && (
+          <KeyboardLayout onKeySelect={(vk, _label) => {
+            pendingKeyVk.current = vk;
+            setPromptTitle('Give your new macro a name');
+            setPromptPlaceholder('e.g. Quick Switch, Reload Combo\u2026');
+            setPromptDefault('');
+            setPromptCallback(() => async (name: string) => {
+              try {
+                const profile = config.profiles.find(p => p.name === config.active_profile) ?? config.profiles[0];
+                let updated: AppConfig = config;
+                if (!profile || profile.groups.length === 0) {
+                  updated = await createGroup('General');
+                  handleConfigUpdate(updated);
+                }
+                updated = await createMacro(0, name);
+                handleConfigUpdate(updated);
+                const newProfile = updated.profiles.find(p => p.name === updated.active_profile) ?? updated.profiles[0];
+                const macroIdx = newProfile.groups[0].macros.length - 1;
+                const newMacro = { ...newProfile.groups[0].macros[macroIdx] };
+                const selectedVk = pendingKeyVk.current!;
+                newMacro.trigger = { ...newMacro.trigger, keys: [selectedVk], trigger_sets: [[selectedVk]] };
+                updated = await updateMacro(0, macroIdx, newMacro);
+                handleConfigUpdate(updated);
+                setSelection({ groupIdx: 0, macroIdx });
+                setPanel('editor');
+                pendingKeyVk.current = null;
+              } catch (err) {
+                console.error('Failed to create macro from keyboard:', err);
+              }
+              setPromptOpen(false);
+            });
+            setPromptOpen(true);
+          }} />
         )}
         </div>
       </div>
 
-      {/* ── Status Bar ── */}
+      <TooltipProvider>
       <div style={{
         gridColumn: '1 / -1',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 16px',
+        padding: '0 1.143rem',
         background: 'var(--bg-surface)',
         borderTop: '1px solid var(--border)',
-        fontSize: 11,
+        fontSize: '0.786rem',
         color: 'var(--text-secondary)',
         fontFamily: 'var(--font-mono)',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{
-            width: 6, height: 6, borderRadius: '50%',
-            background: paused ? 'var(--warning)' : 'var(--success)',
-            boxShadow: paused ? '0 0 6px var(--warning)' : '0 0 6px var(--success)',
-          }} />
-          <span>{paused ? 'Paused' : 'Active'}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.429rem' }}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <div
+              onClick={handleTogglePause}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '0.429rem',
+                cursor: 'pointer',
+                transition: 'opacity 150ms ease',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              <span style={{
+                width: '0.429rem', height: '0.429rem', borderRadius: '50%',
+                background: paused ? 'var(--warning)' : 'var(--success)',
+                boxShadow: paused ? '0 0 6px var(--warning)' : '0 0 6px var(--success)',
+              }} />
+              <span>{paused ? 'Paused' : 'Active'}</span>
+            </div>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {paused ? 'Click to resume' : 'Click to pause'}
+          </TooltipContent>
+        </Tooltip>
+
+          <span style={{ width: 1, height: '0.714rem', background: 'var(--border)' }} />
+
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                onClick={() => {
+                  setSelection(null);
+                  setPanel('settings');
+                  setTimeout(() => document.getElementById('arduino-hid')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+                }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '0.429rem',
+                  cursor: 'pointer',
+                  transition: 'opacity 150ms ease',
+                }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+              >
+                <Plug size={11} style={{
+                  color: hwConnected ? 'var(--success)' : 'var(--text-tertiary)',
+                  transition: 'all 300ms ease',
+                }} />
+                <span style={{ color: hwConnected ? 'var(--text-secondary)' : 'var(--text-tertiary)' }}>
+                  {hwConnected ? 'AuraHID' : 'No AuraHID'}
+                </span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top">{hwConnected ? 'AuraHID connected & active' : 'AuraHID not connected'}</TooltipContent>
+          </Tooltip>
         </div>
         <div>
           {config.active_profile} · {
@@ -374,6 +438,7 @@ export default function App() {
           } macros
         </div>
       </div>
+      </TooltipProvider>
 
       <PromptDialog
         open={promptOpen}
